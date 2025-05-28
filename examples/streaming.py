@@ -1,10 +1,13 @@
+# Example of using OpenAI's Python client to make streaming requests
 import io
 import asyncio
 from openai import OpenAI, AsyncOpenAI
 from dotenv import load_dotenv
 
+# Load environment variables from .env file
 load_dotenv()
 
+# The synchronous main function
 def sync_main() -> None:
     # Initialize the OpenAI client
     client = OpenAI()
@@ -33,6 +36,7 @@ def sync_main() -> None:
         print(chunk.to_json())
 
 
+# The asynchronous main function
 async def async_main() -> None:
     # Initialize the asynchronous OpenAI client
     client = AsyncOpenAI()
