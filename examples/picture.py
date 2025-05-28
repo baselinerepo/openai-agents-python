@@ -3,13 +3,13 @@
 import os
 import asyncio
 from dotenv import load_dotenv
-from openai import OpenAI
+from openai import AsyncOpenAI
 
 # Load environment variables from .env file
 load_dotenv()
 
 # Initialize the OpenAI client with your API key
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # Define the model to use for image generation
 model = "dall-e-3"
