@@ -14,13 +14,13 @@ MODEL: str = "gpt-4o-mini"
 TEMPERATURE: float = 0.7
 
 # Non-streaming:
-# Create a standard chat completion request to the GPT-4o-mini model
-print("---- GPT-4o-mini Chat Completion Stardard Request ----")
-response = client.chat.completions.create(
+# Create a standard chat response request to the GPT-4o-mini model
+print("---- GPT-4o-mini Chat Response Standard Request ----")
+#response = client.chat.completions.create(
+response = client.responses.create(
     model=MODEL,
-    max_tokens=50,
     temperature=TEMPERATURE,
-    messages=[
+    input=[
         {
             "role": "system",
             "content": "You are a helpful assistant that provides concise and accurate information."
@@ -31,7 +31,8 @@ response = client.chat.completions.create(
         }
     ]
 )
-print(response.choices[0].message.content)
+#print(response.choices[0].message.content)
+print(response.output_text)
 
 
 # Streaming:
