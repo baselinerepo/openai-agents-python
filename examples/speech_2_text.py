@@ -37,6 +37,6 @@ async def main() -> None:
         print(f"An error occurred: {e}")
 
 
-# Ensure the microphone is closed properly
+# Run the main function asynchronously
 if __name__ == "__main__":
     asyncio.run(main())
