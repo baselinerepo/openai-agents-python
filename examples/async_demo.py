@@ -37,7 +37,7 @@ async def main():
     print("\n---- GPT-4o-mini Chat Completion Streaming Request ----")
     async for chunk in await client.chat.completions.create(
         model=MODEL,
-        max_tokens=200,
+        max_tokens=500,
         temperature=TEMPERATURE,
         messages=[
             {

@@ -34,7 +34,6 @@ response = client.responses.create(
 #print(response.choices[0].message.content)
 print(response.output_text)
 
-
 # Streaming:
 # Create a chat completion request to the GPT-4o-mini model with streaming enabled
 print("\n---- GPT-4o-mini Chat Completion Streaming Request ----")
