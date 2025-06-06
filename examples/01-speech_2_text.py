@@ -1,6 +1,5 @@
 # Example of using OpenAI's AsyncOpenAI client to transcribe audio from the microphone.
 # This example requires the `openai` package and an active OpenAI API key.
-import asyncio
 import os
 import numpy as np
 from openai import AsyncOpenAI
@@ -39,4 +38,7 @@ async def main() -> None:
 
 # Run the main function asynchronously
 if __name__ == "__main__":
+    # run the main function asynchronously
+    import asyncio
+
     asyncio.run(main())

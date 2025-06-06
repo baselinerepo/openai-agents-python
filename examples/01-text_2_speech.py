@@ -1,5 +1,4 @@
 # This script demonstrates how to use the OpenAI API to convert text to speech asynchronously.
-import asyncio
 import os
 from dotenv import load_dotenv
 from openai import AsyncOpenAI
@@ -44,4 +43,7 @@ async def main() -> None:
 
 # Print the response to confirm success
 if __name__ == "__main__":
+    # Run the main function ashynchronously
+    import asyncio
+
     asyncio.run(main())

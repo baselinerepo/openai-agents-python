@@ -1,7 +1,6 @@
 # Example of using the OpenAI Python client to interact with the API
 # to generate an image using DALL-E 3 based on a given prompt.
 import os
-import asyncio
 from dotenv import load_dotenv
 from openai import AsyncOpenAI
 
@@ -33,5 +32,7 @@ async def generate_image(prompt) -> None:
 
 # Example usage
 if __name__ == "__main__":
+    import asyncio
+
     prompt = "A futuristic city skyline at sunset, featuring towering skyscrapers with neon-lit holographic advertisements. The buildings showcase sleek, sci-fi architecture with glass facades reflecting warm hues of orange and purple. Flying cars zoom between structures, leaving behind glowing trails. In the foreground, a bustling street with robotic vendors selling exotic digital wares. The scene is cinematic, with dramatic lighting and intricate details."
     asyncio.run(generate_image(prompt))

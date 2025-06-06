@@ -1,5 +1,4 @@
 # Example of using OpenAI's structured output feature with Pydantic models
-import asyncio
 import os
 import time
 from openai import AsyncOpenAI
@@ -58,6 +57,8 @@ async def generate_calendar_event(title: str, date: str, time: str, location: st
 # Run the function and print the result
 if __name__ == "__main__":
     # Example usage
+    import asyncio
+
     strTime = time.strftime("%H:%M:%S")
     strDate = date.today().strftime("%A")
     print(asyncio.run(generate_calendar_event(title="Science fair", date=strDate, time=strTime, location="New York", participants=["jim, john, jane"])))

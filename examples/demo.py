@@ -6,16 +6,16 @@ import os
 # gets the api key from the .env file
 load_dotenv()
 
-# Initialize the OpenAI client with the API key
-client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
-
 # Model constants
 MODEL: str = "gpt-4o-mini"
-TEMPERATURE: float = 0.7
+TEMPERATURE: float = 0.0
+
+# Initialize the OpenAI client with the API key
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # Non-streaming:
 # Create a standard chat response request to the GPT-4o-mini model
-print("---- GPT-4o-mini Chat Response Standard Request ----")
+print(f"---- GPT-4o-mini Chat Response Standard Request ----")
 #response = client.chat.completions.create(
 response = client.responses.create(
     model=MODEL,
@@ -39,7 +39,7 @@ print(response.output_text)
 print("\n---- GPT-4o-mini Chat Completion Streaming Request ----")
 for chunk in client.chat.completions.create(
     model=MODEL,
-    max_tokens=200,
+    max_tokens=50,
     temperature=TEMPERATURE,
     messages=[
         {

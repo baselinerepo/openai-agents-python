@@ -1,6 +1,5 @@
 # This script demonstrates how to use the OpenAI API to get a async response from the GPT-4o-mini model.
 import os
-import asyncio
 from openai import AsyncOpenAI
 
 # Initialize the OpenAI client with the API key
@@ -8,7 +7,7 @@ client = AsyncOpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
 # Model configuration
 MODEL: str = "gpt-4o-mini"
-TEMPERATURE: float = 0.7
+TEMPERATURE: float = 0.0
 
 async def main():
     # Non-streaming:
@@ -76,4 +75,8 @@ async def main():
     print(response.request_id)
     print(completion.choices[0].message.content)
 
-asyncio.run(main())
+
+if __name__ == "__main__":
+    # Run the main function using asyncio
+    import asyncio
+    asyncio.run(main())

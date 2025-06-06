@@ -1,6 +1,4 @@
 # Example of using OpenAI's Python client to make streaming requests
-import io
-import asyncio
 from openai import OpenAI, AsyncOpenAI
 from dotenv import load_dotenv
 
@@ -67,5 +65,9 @@ async def async_main() -> None:
         print(chunk.to_json())
 
 # run asynchronous and synchronous main functions
-sync_main()
-asyncio.run(async_main())
+if __name__ == "__main__":
+    # Run the synchronous main function
+    import asyncio
+
+    sync_main()
+    asyncio.run(async_main())
