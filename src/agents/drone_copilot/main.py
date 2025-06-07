@@ -33,7 +33,7 @@ def get_chat_completion(
     seed: int = 42,
     functions = None,
     tool_choice = None,
-) -> str:
+) -> tuple[str, dict[str, Any]]:
     """
     Get a chat completion from the OpenAI API.
 
