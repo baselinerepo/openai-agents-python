@@ -3,3 +3,6 @@ openai
 pydantic
 pillow
 numpy
+pandas
+ipython
+jinja2
