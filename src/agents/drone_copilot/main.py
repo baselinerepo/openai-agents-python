@@ -9,15 +9,15 @@ import pandas as pd
 import time
 import base64
 import jinja2
+from dotenv import load_dotenv
 from IPython.display import display
 from typing import List, Dict, Any, Generator
-from dotenv import load_dotenv
 from openai import OpenAI
-
-MODEL = "gpt-4o-mini"
 
 # Load environment variables from .env file
 load_dotenv()
+
+MODEL: str = os.environ.get("OPENAI_API_MODEL")
 
 # Initialize OpenAI client
 client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
@@ -172,7 +172,6 @@ def eval(model: str,
     print(f"Number of matches: {matches} out of {total_prompts} ({match_percentage:.2f}%)")
     print(f"Average latency per request: {average_latency:.2f} ms")
     print(f"Average tokens used per request: {average_tokens_used:.2f}")
-
 
 
 # System prompt
@@ -621,7 +620,8 @@ straightforward_prompts_to_expected = {
     "Take off the drone to an altitude of 50 meters.": "takeoff_drone",
     "Land the drone at the current location.": "land_drone",
     "Move the drone forward by 5 meters.": "control_drone_movement",
-    "Capture a photo with high resolution.": "capture_image",
+    "Can you take a photo?": "capture_image",
+    "Set the flight mode to autonomous.": "set_flight_mode",
     # Add more prompts and expected function calls as needed
 }
 
@@ -634,3 +634,20 @@ eval(
 )
 
 
+# let's try some more difficult requests: requests that are almost feasible and are drone-related,
+# but that the drone cannot actually do, and the pilot should reject.
+challenging_prompts_to_expected = {
+    "Can you take off the drone and fly it to the moon?": "reject_request",
+    "Land the drone on a moving train.": "reject_request",
+    "Can you make the drone fly upside down?": "reject_request",
+    "Take a photo of the entire city from 1000 meters above.": "reject_request",
+    # Add more challenging prompts and expected function calls as needed
+}
+
+# evaluate the model with the challenging prompts
+eval(
+    model=MODEL,
+    system_prompt=DRONE_SYSTEM_PROMPT,
+    functions_list=DRONE_FUNCTIONS_LIST,
+    prompts_to_expected_tool_name=challenging_prompts_to_expected,
+)
