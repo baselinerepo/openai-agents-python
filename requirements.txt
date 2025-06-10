@@ -1,6 +1,5 @@
 python-dotenv
 openai
-openai-agents
 pydantic
 pillow
 numpy
