@@ -1,8 +1,8 @@
 # Example of using tools with an agent sdk
 # import necessary libraries
 import asyncio
-from pydantic import BaseModel
 from agents import Agent, Runner, function_tool
+from pydantic import BaseModel
 
 class Weather(BaseModel):
     city: str
