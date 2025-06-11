@@ -6,11 +6,46 @@ import json
 import requests
 
 from openai import OpenAI
+from typing import List, Dict, Any
+
+# Define the model to be used
+MODEL = "gpt-4o-mini"
 
 # Initialize OpenAI client with API key
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY") or os.getenv("_OPENAI_API_KEY"))
 
-# Function to get the current weather based on latitude and longitude
+# Utility function to get the current weather based on latitude and longitude
+def get_response(
+    input_messages: List[Dict[str, str]],
+    model: str = MODEL,
+    temperature: float = 0.0,
+    tools = None,
+    tool_choice = None,
+) -> tuple[str, dict[str, Any]]:
+    """
+    Function to get a response from the OpenAI model with optional tools.
+    Args:
+        input_messages (List[Dict[str, str]]): List of messages to send to the model.
+        model (str): The model to use for generating the response.
+        temperature (float): Temperature for response variability.
+        tools (list, optional): List of tools to be used by the model.
+        tool_choice (str, optional): Tool choice strategy.
+    Returns:
+        tuple[str, dict[str, Any]]: The output text and the response object.
+    """
+
+    params = {
+        "model": model,
+        "input": input_messages,
+        "temperature": temperature,
+        "tools": tools,
+        "tool_choice": tool_choice,
+    }
+
+    response = client.responses.create(**params)
+    return response.output[0]
+
+
 def get_weather(latitude, longitude):
     """
     Function to get the current weather for given latitude and longitude.
@@ -40,11 +75,9 @@ tools = [{
         "properties": {
             "latitude": {
                 "type": "number",
-                "description": "Latitude of the location."
             },
             "longitude": {
                 "type": "number",
-                "description": "Longitude of the location."
             }
         },
         "required": ["latitude", "longitude"],
@@ -60,14 +93,14 @@ input_message = [
     }
 ]
 
-response = client.responses.create(
+response_output = get_response(
     model="gpt-4o-mini",
-    input=input_message,
+    input_messages=input_message,
     tools=tools,
 )
 
 # Step 2: Model decided to call the get_weather function
-print(response.output)
+print(response_output)
 
 # response output
 #[
@@ -82,7 +115,7 @@ print(response.output)
 #]
 
 # Step 3: Execute the get_weather function with the provided arguments
-tool_call = response.output[0]
+tool_call = response_output
 args = json.loads(tool_call.arguments)
 
 result = get_weather(args['latitude'], args['longitude'])
@@ -96,14 +129,14 @@ input_message.append({
     "output": str(result)
 })
 
-response_2 = client.responses.create(
+response_output_2 = client.responses.create(
     model="gpt-4o-mini",
     input=input_message,
     tools=tools,
 )
 
 # Final response from the model incorporating the weather data
-print(response_2.output_text)
+print(response_output_2.output_text)
 
 # Final response output
 # "The current weather in Bogotá, Colombia, is about 12.7°C with a wind speed of 3.6 m/s."
