@@ -2,8 +2,10 @@
 # import necessary libraries
 from openai import OpenAI
 
+# Initialize OpenAI client with API key
 client = OpenAI()
 
+# Function calling tool to send email
 tools = [{
     "type": "function",
     "name": "send_email",
