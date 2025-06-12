@@ -27,17 +27,19 @@ tools = [{
             }
         },
         "required": ["to", "subject", "body"],
-        "AdditionalProperties": "False"
+        "AdditionalProperties": False
     }
 }]
 
-response = client.responses.create(
-    model="gpt-4o-mini",
-    input=[{"role": "user", "content": "Can you send an email to ashish.hatkar@gmail.com and top8234568@yahoo.com saying just wanting to say hi?"}],
-    tools=tools
-)
-
-print(response.output)
+try:
+    response = client.responses.create(
+        model="gpt-4o-mini",
+        input=[{"role": "user", "content": "Can you send an email to ashish.hatkar@gmail.com and top8234568@yahoo.com saying just wanting to say hi?"}],
+        tools=tools
+    )
+    print(response.output)
+except Exception as e:
+    print(f"An error occurred: {e}")
 
 # response output
 #[

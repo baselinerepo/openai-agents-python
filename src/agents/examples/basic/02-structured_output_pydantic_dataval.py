@@ -5,7 +5,7 @@ from openai import AsyncOpenAI
 from pydantic import BaseModel
 from datetime import date, datetime
 
-# # Initialize OpenAI client
+# Initialize OpenAI client
 client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # Model constants

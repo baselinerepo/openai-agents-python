@@ -30,7 +30,7 @@ async def generate_image(prompt) -> None:
     except Exception as e:
         print(f"An error occurred: {e}")
 
-# Example usage
+# run function asynchronously
 if __name__ == "__main__":
     import asyncio
 

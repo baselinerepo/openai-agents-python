@@ -23,15 +23,17 @@ tools = [{
     }
 }]
 
-response = client.responses.create(
-    model="gpt-4.1",
-    input=[
-        {
-            "role": "user",
-            "content": "What is the weather like in Bogotá, Colombia?"
-        }
-    ],
-    tools=tools,
-)
-
-print(response.output)
+try:
+    response = client.responses.create(
+        model="gpt-4.1",
+        input=[
+            {
+                "role": "user",
+                "content": "What is the weather like in Bogotá, Colombia?"
+            }
+        ],
+        tools=tools,
+    )
+    print(response.output)
+except Exception as e:
+    print(f"An error occurred: {e}")
