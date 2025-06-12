@@ -93,7 +93,7 @@ tools = [{
         "required": ["latitude", "longitude"],
         "additionalProperties": False,
     },
-    "strict": True
+    "strict": True # will ensure function calls reliably adhere to the function schema
 }]
 
 input_messages = [
