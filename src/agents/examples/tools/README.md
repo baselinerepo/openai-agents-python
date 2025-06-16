@@ -9,7 +9,7 @@ OpenAI offers several built-in tools from the available tools list and let the m
 1. Function Calling
     - Call custom code to give the model access to additional data and capabilities
 2. Web Search
-    - Include data from the internet in model response generation
+    - Allows model to search the web for latest information before generating a response
 3. Remote MCP Server
     - Give the model access to new capabilities via Model Context Protocol (MCP) servers
 4. File Search
