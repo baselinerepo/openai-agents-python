@@ -9,8 +9,12 @@
 # o3
 
 # import necessary libraries
+from dotenv import load_dotenv
 from openai import OpenAI
 import base64
+
+# load environment variables from .env file
+load_dotenv()
 
 # initialize openai client
 client = OpenAI()
