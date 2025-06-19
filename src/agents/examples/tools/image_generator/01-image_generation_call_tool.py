@@ -1,5 +1,13 @@
 # The image generation tool allows you to generate images using a text prompt, and optionally image inputs.
 # The image_generation_call tool call result will include a base64-encoded image.
+# list of supported models
+# gpt-4o
+# gpt-4o-mini
+# gpt-4.1
+# gpt-4.1-mini
+# gpt-4.1-nano
+# o3
+
 # import necessary libraries
 from openai import OpenAI
 import base64

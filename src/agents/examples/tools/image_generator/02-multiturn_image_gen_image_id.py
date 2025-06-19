@@ -1,6 +1,13 @@
 # Multi-turn editing
 # You can iteratively edit images by referencing previous response IDs or image IDs.
 # This allows you to refine images across multiple turns in a conversation
+# list of supported models
+# gpt-4o
+# gpt-4o-mini
+# gpt-4.1
+# gpt-4.1-mini
+# gpt-4.1-nano
+# o3
 
 # Using image IDs
 
