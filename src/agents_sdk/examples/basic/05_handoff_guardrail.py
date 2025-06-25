@@ -1,8 +1,11 @@
-# creating a handoff
+# creating a handoff and guardrail
 # handoffs allow an agent to delegate tasks to another agent.
 # different agents sceneraios
 # for example a customer support app might have agents that each specifically handles tasks
 # like order status, refunds, FAQs etc.
+# Agents : which are LLM equipped with instructions and tools
+# Handoffs: which allow agents to delegate task to other agents for specific tasks
+# Guardrails: which enables the input to agents to be validated
 # import libraries
 from agents import Agent, GuardrailFunctionOutput, InputGuardrail, Runner
 import asyncio
