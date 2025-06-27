@@ -19,6 +19,13 @@ They can be used to do things like:
 - Check that input messages don't violate any policies
 - Take over control of the agent's execution if an unexpected input is detected
 
+Guardrail Steps:
+1. First, the guardrail receives the same input passed to the agent.
+2. Next, the guardrail function runs to produce a `GuardrailFunctionOutput`, which is
+   than wrapped in an `InputGuardrailResult`.
+3. Finally, we check the .tripwire_triggered is true, if true, an
+   InputGuardrailTripwireTriggered exception is raised.
+
 In this example, we'll setup an input guardrail that trips if the user is asking to do math homework.
 If the guardrail trips, we'll respond with a refusal message.
 """
