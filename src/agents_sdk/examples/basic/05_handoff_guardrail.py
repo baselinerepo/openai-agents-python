@@ -112,6 +112,8 @@ async def main():
 
             result = await Runner.run(triage_agent, "What is life")
             print(result.final_output)
+            # if the guardrail didn't trigger, we use the result as the input for the next run
+            input_data = result.to_input_list()
         except InputGuardrailTripwireTriggered:
             # if guardrail is triggered, we instead add a refusal message to the input
             message = "Sorry, I can't help you with your math homework."
