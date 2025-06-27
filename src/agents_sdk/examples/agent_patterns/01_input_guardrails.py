@@ -28,6 +28,8 @@ Guardrail Steps:
 
 In this example, we'll setup an input guardrail that trips if the user is asking to do math homework.
 If the guardrail trips, we'll respond with a refusal message.
+
+Ref: https://openai.github.io/openai-agents-python/guardrails/
 """
 
 # define model constant
