@@ -1,5 +1,4 @@
 from __future__ import annotations
-import asyncio
 from pydantic import BaseModel
 
 from agents import (
@@ -12,7 +11,7 @@ from agents import (
     input_guardrail)
 
 """
-# this example shows how to use input guardrails.
+# This example shows how to use input guardrails.
 
 Guardrails are checks that run in parallel to the agent's execution.
 They can be used to do things like:
@@ -95,8 +94,10 @@ async def main():
             })
 
 
-# run asynchronously
+# run the main function asynchronously
 if __name__ == "__main__":
+    import asyncio
+
     asyncio.run(main())
 
 # Final Output

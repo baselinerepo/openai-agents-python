@@ -1,22 +1,41 @@
-#------------------------------------------------------------------------------
-# creating a handoff and guardrail
-# handoffs allow an agent to delegate tasks to another agent.
-# different agents sceneraios
-# for example a customer support app might have agents that each specifically handles tasks
-# like order status, refunds, FAQs etc.
-# Agents : which are LLM equipped with instructions and tools
-# Handoffs: which allow agents to delegate task to other agents for specific tasks
-# Guardrails: which enables the input to agents to be validated
-# Tripwires: if the input or output fails the guardrails. the Guardrail will signal this with a Tripwire
-#------------------------------------------------------------------------------
 # import libraries
-from agents import (Agent, GuardrailFunctionOutput, InputGuardrailTripwireTriggered, RunContextWrapper, TResponseInputItem, InputGuardrail, Runner)
+from agents import (
+    Agent,
+    GuardrailFunctionOutput,
+    InputGuardrailTripwireTriggered,
+    RunContextWrapper,
+    TResponseInputItem,
+    InputGuardrail,
+    Runner
+)
 import asyncio
 from pydantic import BaseModel
+
+"""
+# This example shows how to use handoffs and guardrails.
+
+Handoffs allows a agent to delegate tasks to another agent.
+They can be used to do things like:
+- Customer support app might have agents for specific tasks
+- Like Order status, refunds, FAQs etc.
+
+Guardrails are checks that run in parallel to the agent's execution.
+They can be used to do things like:
+- Check if input messages are off-topic
+- Check that input messages don't violate any policies
+- Take over control of the agent's execution if an unexpected input is detected
+
+Tripwires: If the input or output fails the guardrails, the Guardrail will 
+signal this with a Tripwire.
+
+In this example, we'll setup an input guardrail that trips if the user is asking to do math homework.
+If the guardrail trips, we'll respond with a refusal message.
+"""
 
 # model constant
 MODEL: str = "gpt-4o-mini"
 
+### Step 1. An agent-based guardrail that is triggered if the user is asking to do homework
 class HomeworkOutput(BaseModel):
     is_homework: bool
     reasoning: str
@@ -24,7 +43,7 @@ class HomeworkOutput(BaseModel):
 # implementing a guardrail
 guardrail_agent = Agent(
     model=MODEL,
-    name="Guardrail check",
+    name="Guardrail Check",
     instructions="Check if the user is asking about homework.",
     output_type=HomeworkOutput
 )
@@ -46,10 +65,13 @@ history_tutor_agent = Agent(
     instructions="You provide assistance with historical queries. Explain important events and context clearly.",
 )
 
-# define guardrail function
+# define input guardrail function
 async def homework_guardrail(
     ctx: RunContextWrapper[None], agent: Agent, input_data: str | list[TResponseInputItem]
     ) -> GuardrailFunctionOutput:
+    """
+    This is an input guardrail function
+    """
     result = await Runner.run(guardrail_agent, input_data, context=ctx.context)
     final_output = result.final_output_as(HomeworkOutput)
 
@@ -58,27 +80,49 @@ async def homework_guardrail(
         tripwire_triggered=final_output.is_homework,
     )
 
-# define your handoffs
-triage_agent = Agent(
-    model=MODEL,
-    name="Triage Agent",
-    instructions="You determine which agent to use based on the user's homework question",
-    handoffs=[history_tutor_agent, math_tutor_agent],
-    input_guardrails=[
-        InputGuardrail(guardrail_function=homework_guardrail),
-    ],
-)
+### Step 2. The run loop
 
 # main function
 async def main():
-    result = await Runner.run(triage_agent, "Who was the first president of the United States?")
-    print(result.final_output)
 
-    result = await Runner.run(triage_agent, "What is life")
-    print(result.final_output)
+    # define your handoffs
+    triage_agent = Agent(
+        model=MODEL,
+        name="Triage Agent",
+        instructions="You determine which agent to use based on the user's homework question",
+        handoffs=[history_tutor_agent, math_tutor_agent],
+        input_guardrails=[
+            InputGuardrail(guardrail_function=homework_guardrail),
+        ],
+    )
+
+    input_data: list[TResponseInputItem] = []
+
+    while True:
+        user_input = input("Enter a message: ")
+        input_data.append({
+            "role": "user",
+            "content": user_input
+        })
+
+        # this should trip the guardrail
+        try:
+            result = await Runner.run(triage_agent, input_data)
+            print(result.final_output)
+
+            result = await Runner.run(triage_agent, "What is life")
+            print(result.final_output)
+        except InputGuardrailTripwireTriggered:
+            # if guardrail is triggered, we instead add a refusal message to the input
+            message = "Sorry, I can't help you with your math homework."
+            print(f"{message}, Math homework guardrail tripped")
+            input_data.append({
+                "role": "assistant",
+                "content": "message",
+            })
 
 
-# run asynchronously
+# run the main funciton asynchronously
 if __name__ == "__main__":
     asyncio.run(main())
 
