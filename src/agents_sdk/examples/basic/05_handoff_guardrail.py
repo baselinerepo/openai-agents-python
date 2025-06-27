@@ -8,7 +8,6 @@ from agents import (
     InputGuardrail,
     Runner
 )
-import asyncio
 from pydantic import BaseModel
 
 """
@@ -24,6 +23,13 @@ They can be used to do things like:
 - Check if input messages are off-topic
 - Check that input messages don't violate any policies
 - Take over control of the agent's execution if an unexpected input is detected
+
+Guardrail Steps:
+1. First, the guardrail receives the same input passed to the agent.
+2. Next, the guardrail function runs to produce a `GuardrailFunctionOutput`, which is
+   than wrapped in an `InputGuardrailResult`.
+3. Finally, we check the .tripwire_triggered is true, if true, an
+   InputGuardrailTripwireTriggered exception is raised.
 
 Tripwires: If the input or output fails the guardrails, the Guardrail will 
 signal this with a Tripwire.
@@ -126,6 +132,7 @@ async def main():
 
 # run the main funciton asynchronously
 if __name__ == "__main__":
+    import asyncio
     asyncio.run(main())
 
 
