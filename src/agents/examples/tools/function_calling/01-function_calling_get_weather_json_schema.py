@@ -1,5 +1,5 @@
 # tools: function calling example for get weather information using json schema
-# import necessary libraries
+# import libraries
 import os
 from dotenv import load_dotenv
 from openai import OpenAI
