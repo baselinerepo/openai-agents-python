@@ -5,6 +5,7 @@ from agents import Agent, AsyncOpenAI, Runner, OpenAIResponsesModel
 
 """
 The Agents SDK comes with out-of-the-box support for OpenAI models in two flavors:
+The OpenAIResponsesModel, which calls OpenAI APIs using the new Responses API.
 The OpenAIResponsesModel which calls OpenAI APIs using the new Responses API.
 """
 
