@@ -1,11 +1,11 @@
-# import necessary libraries
+# import libraries
 from openai import OpenAI
 
 # initialize openai client
 client = OpenAI()
 
 # define model constant
-MODEL: str = "gpt-4o-mini"
+GPT_MODEL: str = "gpt-4o-mini"
 
 #--------------------------------------------------------------------
 # Step 1: run python3 -m utility
@@ -16,7 +16,7 @@ MODEL: str = "gpt-4o-mini"
 # file_search tool
 #--------------------------------------------------------------------
 response = client.responses.create(
-    model=MODEL,
+    model=GPT_MODEL,
     input="What is deep research by OpenAI?",
     tools=[{
         "type": "file_search",

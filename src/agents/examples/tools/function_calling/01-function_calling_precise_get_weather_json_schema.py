@@ -8,16 +8,16 @@ import requests
 from openai import OpenAI
 from typing import List, Dict, Any
 
-# Define the model to be used
-MODEL = "gpt-4o-mini"
-
 # # Initialize OpenAI client with API Key
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY") or os.getenv("_OPENAI_API_KEY"))
+
+# Define the model to be used
+GPT_MODEL = "gpt-4o-mini"
 
 # Utility function to get the current weather based on latitude and longitude
 def get_client_response(
     input: List[Dict[str, str]],
-    model: str = MODEL,
+    model: str = GPT_MODEL,
     temperature: float = 0.0,
     tools = None,
     tool_choice = None,
@@ -104,7 +104,7 @@ input_messages = [
 ]
 
 response = get_client_response(
-    model="gpt-4o-mini",
+    model=GPT_MODEL,
     input=input_messages,
     tools=tools,
 )
@@ -146,7 +146,7 @@ input_messages.append({
 })
 
 response_2 = get_client_response(
-    model="gpt-4o-mini",
+    model=GPT_MODEL,
     input=input_messages,
     tools=tools,
 )

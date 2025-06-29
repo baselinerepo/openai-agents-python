@@ -1,7 +1,11 @@
 # Function calling example with search_knowledge_base function
 # import necessary libraries
 import os
+from dotenv import load_dotenv
 from openai import OpenAI
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Initialize OpenAI client with API Key
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY") or os.getenv("_OPENAI_API_KEY"))

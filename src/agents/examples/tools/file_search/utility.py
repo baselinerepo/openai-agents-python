@@ -7,7 +7,7 @@ from openai import OpenAI
 client = OpenAI()
 
 # model constant to use
-MODEL: str = "gpt-4o-mini"
+GPT_MODEL: str = "gpt-4o-mini"
 
 #--------------------------------------------------------------------
 # upload the file to the File API

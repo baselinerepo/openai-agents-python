@@ -1,10 +1,17 @@
 # tools: function calling example for get weather information using json schema
 # import necessary libraries
 import os
+from dotenv import load_dotenv
 from openai import OpenAI
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Initialize OpenAI client with API key
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY") or os.getenv("_OPENAI_API_KEY"))
+
+# Define the model to use for image generation
+GPT_MODEL = "gpt-4.1"
 
 # json schema for the tool
 tools = [{
@@ -26,7 +33,7 @@ tools = [{
 
 try:
     response = client.responses.create(
-        model="gpt-4.1",
+        model=GPT_MODEL,
         input=[
             {
                 "role": "user",

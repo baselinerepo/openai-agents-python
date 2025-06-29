@@ -1,3 +1,4 @@
+##------------------------------------------------------------
 # The Code Interpreter tool allows models to write and run Python code in a sandboxed environment 
 # to solve complex problems in domains like data analysis, coding, and math. Use it for:
 #
@@ -14,16 +15,18 @@
 # { "type": "auto", files: ["file1", "file2"] }
 # 2. Explicit mode: you create a container using the v1/containers endpoint, and assigns 
 # its id as the container value in the tool configuration.
+##------------------------------------------------------------
+# import dependencies
 from openai import OpenAI
 
 # initialize openai client
 client = OpenAI()
 
 # define model constant
-MODEL: str = "gpt-4o-mini"
+GPT_MODEL: str = "gpt-4o-mini"
 
 response = client.responses.create(
-    model=MODEL,
+    model=GPT_MODEL,
     tools=[{
         "type": "code_interpreter",
         "container": { "type": "auto" }
