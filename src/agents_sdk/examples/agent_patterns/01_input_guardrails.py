@@ -8,7 +8,8 @@ from agents import (
     InputGuardrailTripwireTriggered,
     RunContextWrapper,
     TResponseInputItem,
-    input_guardrail)
+    input_guardrail
+)
 
 """
 # This example shows how to use input guardrails.
@@ -33,7 +34,7 @@ Ref: https://openai.github.io/openai-agents-python/guardrails/
 """
 
 # define model constant
-MODEL: str = "gpt-4o-mini"
+GPT_MODEL: str = "gpt-4o-mini"
 
 ### Step 1. An agent-based guardrail that is triggered if the user is asking to do math homework
 class MathHomeworkOutput(BaseModel):
@@ -42,7 +43,7 @@ class MathHomeworkOutput(BaseModel):
 
 # the guardrail agent
 guardrail_agent = Agent(
-    model=MODEL,
+    model=GPT_MODEL,
     name="Guardrail Check",
     instructions="Check if the user is asking you to do their math homework.",
     output_type=MathHomeworkOutput,
@@ -71,7 +72,7 @@ async def main():
 
     # define customer suport agent
     customer_support_agent = Agent(
-        model=MODEL,
+        model=GPT_MODEL,
         name="Customer support agent",
         instructions="You are a customer support agent. You help customers with their questions.",
         input_guardrails=[math_guardrail],
@@ -106,8 +107,8 @@ async def main():
 # run the main function asynchronously
 if __name__ == "__main__":
     import asyncio
-
     asyncio.run(main())
+
 
 # Final Output
 # Enter a message: What's the capital of California?

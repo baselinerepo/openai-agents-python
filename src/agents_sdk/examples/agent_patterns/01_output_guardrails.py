@@ -40,7 +40,7 @@ Ref: https://openai.github.io/openai-agents-python/guardrails/
 """
 
 # define model constant
-MODEL: str = "gpt-4o-mini"
+GPT_MODEL: str = "gpt-4o-mini"
 
 class MessageOutput(BaseModel):
     response: str
