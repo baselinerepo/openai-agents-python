@@ -4,6 +4,7 @@
 import asyncio
 from agents import Agent, Runner
 
+# define async main function
 async def main():
     agent = Agent(name="Assistant", instructions="You only respond in haikus.")
     result = await Runner.run(agent, "Tell me a haiku about nature.")

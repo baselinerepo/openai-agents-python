@@ -1,10 +1,16 @@
 # Example of using Agent Hooks to track the lifecycle of agents and tools
 # import necessary libraries
-import asyncio
 import random
 from typing import Any
 from pydantic import BaseModel
-from agents import Agent, AgentHooks, RunContextWrapper, Runner, Tool, function_tool
+from agents import (
+    Agent,
+    AgentHooks,
+    RunContextWrapper,
+    Runner,
+    Tool,
+    function_tool
+)
 
 class CustomAgentHooks(AgentHooks):
     def __init__(self, display_name: str):
@@ -51,6 +57,7 @@ def multiply_by_three_tool(x: int) -> int:
 class FinalResult(BaseModel):
     number: int
 
+# the multiply agent
 multiply_agent = Agent(
     name="Multiply Agent",
     instructions="Multiply the number by three and return the final result.",
@@ -59,6 +66,7 @@ multiply_agent = Agent(
     hooks=CustomAgentHooks(display_name="Multiply Agent Hooks"),
 )
 
+# the start agent
 start_agent = Agent(
     name="Start Agent",
     instructions="Generate a random number. If it's even stop. If it's odd, hand off to the multiply agent.",
@@ -68,6 +76,7 @@ start_agent = Agent(
     hooks=CustomAgentHooks(display_name="Start Agent Hooks"),
 )
 
+# define async main function
 async def main() -> None:
     user_input = input("Enter a maximum number: ")
     try:
@@ -83,4 +92,5 @@ async def main() -> None:
 
 # run the main function asynccronously
 if __name__ == "__main__":
+    import asyncio
     asyncio.run(main())

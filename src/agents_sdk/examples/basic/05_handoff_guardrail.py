@@ -39,7 +39,7 @@ If the guardrail trips, we'll respond with a refusal message.
 """
 
 # model constant
-MODEL: str = "gpt-4o-mini"
+GPT_MODEL: str = "gpt-4o-mini"
 
 ### Step 1. An agent-based guardrail that is triggered if the user is asking to do homework
 class HomeworkOutput(BaseModel):
@@ -48,24 +48,24 @@ class HomeworkOutput(BaseModel):
 
 # implementing a guardrail
 guardrail_agent = Agent(
-    model=MODEL,
+    model=GPT_MODEL,
     name="Guardrail Check",
     instructions="Check if the user is asking about homework.",
     output_type=HomeworkOutput
 )
 
 # handoff description provide additional context for determining handoff routing
-# math agent
+# the math agent
 math_tutor_agent = Agent(
-    model=MODEL,
+    model=GPT_MODEL,
     name="Math Tutor",
     handoff_description="Specialist agent for math questions",
     instructions="You provide help with math problem. Explain your reasoning at each step and include examples",
 )
 
-# history agent
+# the history agent
 history_tutor_agent = Agent(
-    model=MODEL,
+    model=GPT_MODEL,
     name="History Tutor",
     handoff_description="Specialist agent for historical questions",
     instructions="You provide assistance with historical queries. Explain important events and context clearly.",
@@ -93,7 +93,7 @@ async def main():
 
     # define your handoffs
     triage_agent = Agent(
-        model=MODEL,
+        model=GPT_MODEL,
         name="Triage Agent",
         instructions="You determine which agent to use based on the user's homework question",
         handoffs=[history_tutor_agent, math_tutor_agent],

@@ -1,9 +1,9 @@
 # Example of streaming text responses from an agent using the Agents SDK
 # import necessary libraries
-import asyncio
 from openai.types.responses import ResponseTextDeltaEvent
 from agents import Agent, Runner
 
+# define async main function
 async def main():
     agent = Agent(
         name="Joker",
@@ -17,4 +17,5 @@ async def main():
 
 # run the main function asynchronously
 if __name__ == "__main__":
+    import asyncio
     asyncio.run(main())

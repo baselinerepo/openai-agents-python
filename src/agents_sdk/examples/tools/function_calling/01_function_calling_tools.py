@@ -1,6 +1,5 @@
 # Example of using tools with an agent sdk
-# import necessary libraries
-import asyncio
+# import libraries
 from agents import Agent, Runner, function_tool
 from pydantic import BaseModel
 
@@ -9,6 +8,7 @@ class Weather(BaseModel):
     temperature_range: str
     conditions: str
 
+# define functional calling tools
 @function_tool
 def get_weather(city: str) -> Weather:
     print("[debug] get weather called")
@@ -20,6 +20,7 @@ agent = Agent(
     tools=[get_weather],
 )
 
+# define async main function
 async def main():
     runner = await Runner.run(agent, input="What's the weather in Tokyo?")
     print("Response: ", runner.final_output)
@@ -27,4 +28,5 @@ async def main():
 
 # run the main function asynchronously
 if __name__ == "__main__":
+    import asyncio
     asyncio.run(main())

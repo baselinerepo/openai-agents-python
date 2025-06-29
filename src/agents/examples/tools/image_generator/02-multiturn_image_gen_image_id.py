@@ -10,19 +10,20 @@
 # o3
 
 # Using image IDs
-
-from openai import OpenAI
+# import dependencies
 import base64
+import os
+from openai import OpenAI
 
-# initialize openai client
-client = OpenAI()
+# Initialize the OpenAI client with your API key
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # define model constant
-MODEL: str = "gpt-4.1-mini"
+GPT_MODEL: str = "gpt-4.1-mini"
 
 # built the response api
 response = client.responses.create(
-    model=MODEL,
+    model=GPT_MODEL,
     input="Generate an image of gray tabby cat hugging an otter with an orange scarf",
     tools=[{
         "type": "image_generation"
@@ -48,7 +49,7 @@ if image_data:
 # follow up
 
 response_fwup = client.responses.create(
-    model=MODEL,
+    model=GPT_MODEL,
     input=[
         {
             "role": "user",

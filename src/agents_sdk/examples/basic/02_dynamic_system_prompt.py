@@ -1,10 +1,8 @@
 # an example of a dynamic system prompt that changes based on the context.
 # prerequisites: Install the Agents SDK with `pip install openai-agents`
 # import necessary libraries
-import asyncio
 import random
 from typing import Literal
-
 from agents import Agent, RunContextWrapper, Runner
 
 class CustomContext:
@@ -39,4 +37,5 @@ async def main():
 
 # run the main function asynchronously
 if __name__ == "__main__":
+    import asyncio
     asyncio.run(main())

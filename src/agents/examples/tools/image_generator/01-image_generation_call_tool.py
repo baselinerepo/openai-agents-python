@@ -8,16 +8,17 @@
 # gpt-4.1-nano
 # o3
 
-# import necessary libraries
+# import libraries
+import os
+import base64
 from dotenv import load_dotenv
 from openai import OpenAI
-import base64
 
 # load environment variables from .env file
 load_dotenv()
 
-# initialize openai client
-client = OpenAI()
+# Initialize the OpenAI client with your API key
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # define model constant
 MODEL: str = "gpt-4o-mini"

@@ -1,10 +1,15 @@
 # https://platform.openai.com/docs/guides/tools-web-search?api-mode=responses
 # Allows model to search the web for latest information before generating a response
-# import necessary libraries
+# import libraries
+import os
+from dotenv import load_dotenv
 from openai import OpenAI
 
-# Initialize OpenAI client
-client = OpenAI()
+# Load environment variables from .env file
+load_dotenv()
+
+# Initialize the OpenAI client with your API key
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # Define the web search function
 def web_search(query: str) -> str:
@@ -23,7 +28,6 @@ def web_search(query: str) -> str:
 
     return response
 
-
 def web_search_with_location(query: str) -> str:
     response = client.responses.create(
         model="gpt-4o-mini",
@@ -40,7 +44,6 @@ def web_search_with_location(query: str) -> str:
     )
 
     return response
-
 
 def web_search_customize_context_size(query: str) -> str:
     response = client.responses.create(
@@ -62,8 +65,7 @@ if __name__ == "__main__":
     print(f"Response: {results1}")
     print("Search Results:", results1.output_text)
 
-# response output text
-#Response: 
+## response output text
 #Response(
 #    id='resp_684d4292acfc819ca43c207f7c9d9d2c017f391869486737', 
 #    created_at=1749893778.0, 

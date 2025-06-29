@@ -4,17 +4,18 @@
 # You can set the number of partial images (1-3) with the partial_images parameter.
 
 # import libraries
-from openai import OpenAI
+import os
 import base64
+from openai import OpenAI
 
-# initialize openai client
-client = OpenAI()
+# Initialize the OpenAI client with your API key
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # define model constant
-MODEL: str = "gpt-4.1"
+GPT_MODEL: str = "gpt-4.1"
 
 response_stream = client.responses.create(
-    model=MODEL,
+    model=GPT_MODEL,
     input="Draw a gorgeous image of a river made of white owl feathers, snaking its way through a serene winter landscape",
     stream=True,
     tools=[{"type": "image_generation", "partial_images": 2}]
