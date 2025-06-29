@@ -43,5 +43,6 @@ try:
         tools=tools,
     )
     print(response.output)
+
 except Exception as e:
     print(f"An error occurred: {e}")

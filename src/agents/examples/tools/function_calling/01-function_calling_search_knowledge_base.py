@@ -10,7 +10,7 @@ load_dotenv()
 # Initialize OpenAI client with API Key
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY") or os.getenv("_OPENAI_API_KEY"))
 
-# Define the tools for function calling
+# Define the json schema for function calling
 tools = [{
     "type": "function",
     "name": "search_knowledge_base",

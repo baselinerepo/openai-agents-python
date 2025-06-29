@@ -1,5 +1,5 @@
 # function calling example with send_email function
-# import necessary libraries
+# import libraries
 from openai import OpenAI
 
 # Initialize OpenAI client with API key
@@ -38,6 +38,7 @@ try:
         tools=tools
     )
     print(response.output)
+
 except Exception as e:
     print(f"An error occurred: {e}")
 

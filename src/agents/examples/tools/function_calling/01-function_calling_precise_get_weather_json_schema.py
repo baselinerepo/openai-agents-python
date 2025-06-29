@@ -1,6 +1,6 @@
 # function calling tools with precise latitude and longitude instead of general
 # location parameter leveraging JSON schema for weather data
-# import required libraries
+# import libraries
 import os
 import json
 import requests
