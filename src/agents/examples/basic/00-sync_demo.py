@@ -1,24 +1,24 @@
 # This script demonstrates how to use the OpenAI API to get a response from the GPT-4o-mini model.
+import os
 from dotenv import load_dotenv
 from openai import OpenAI
-import os
 
 # gets the api key from the .env file
 load_dotenv()
 
-# Model constants
-MODEL: str = "gpt-4o-mini"
-TEMPERATURE: float = 0.0
-
 # Initialize the OpenAI client with the API key
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+# defines the Model constants
+GPT_MODEL: str = "gpt-4o-mini"
+TEMPERATURE: float = 0.0
 
 # Non-streaming:
 # Create a standard chat response request to the GPT-4o-mini model
 print(f"---- GPT-4o-mini Chat Response Standard Request ----")
 #response = client.chat.completions.create(
 response = client.responses.create(
-    model=MODEL,
+    model=GPT_MODEL,
     temperature=TEMPERATURE,
     input=[
         {
@@ -38,7 +38,7 @@ print(response.output_text)
 # Create a chat completion request to the GPT-4o-mini model with streaming enabled
 print("\n---- GPT-4o-mini Chat Completion Streaming Request ----")
 for chunk in client.chat.completions.create(
-    model=MODEL,
+    model=GPT_MODEL,
     max_tokens=50,
     temperature=TEMPERATURE,
     messages=[
@@ -60,7 +60,7 @@ for chunk in client.chat.completions.create(
 # Print the response headers from the non-streaming request
 print("\n\n---- GPT-4o-mini Chat Completion Response Headers ----")
 response = client.chat.completions.with_raw_response.create(
-    model=MODEL,
+    model=GPT_MODEL,
     max_tokens=50,
     temperature=TEMPERATURE,
     messages=[
@@ -74,6 +74,7 @@ response = client.chat.completions.with_raw_response.create(
         }
     ]
 )
+
 completion = response.parse()
 print(response.request_id)
 print(completion.choices[0].message.content)

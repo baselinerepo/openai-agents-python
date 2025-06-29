@@ -1,6 +1,8 @@
 # Example of using OpenAI's Python client to make streaming requests
-from openai import OpenAI, AsyncOpenAI
+# import dependencies
+import os
 from dotenv import load_dotenv
+from openai import OpenAI, AsyncOpenAI
 
 # Load environment variables from .env file
 load_dotenv()
@@ -8,17 +10,17 @@ load_dotenv()
 # The synchronous main function
 def sync_main() -> None:
     # Initialize the OpenAI client
-    client = OpenAI()
+    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
     # Model constants
-    MODEL: str = "gpt-4o-mini"
+    GPT_MODEL: str = "gpt-4o-mini"
     TEMPERATURE: float = 0.0
 
     # Streaming:
     # Create a sync chat completion request to the gpt-4o-mini model with streaming enabled
     print("\n---- gpt-4o-mini Chat Completion Streaming Request ----")
     response = client.completions.create(
-        model=MODEL,
+        model=GPT_MODEL,
         max_tokens=5,
         temperature=TEMPERATURE,
         prompt="1,2,3,",
@@ -34,20 +36,20 @@ def sync_main() -> None:
         print(chunk.to_json())
 
 
-# The asynchronous main function
+# define the asynchronous main function
 async def async_main() -> None:
     # Initialize the asynchronous OpenAI client
-    client = AsyncOpenAI()
+    client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
     # Model constants
-    MODEL: str = "gpt-4o-mini"
+    GPT_MODEL: str = "gpt-4o-mini"
     TEMPERATURE: float = 0.0
 
     # Streaming:
     # Create a sync chat completion request to the gpt-4o-mini model with streaming enabled
     print("\n---- gpt-4o-mini async Chat Completion Streaming Request ----")
     response = await client.completions.create(
-        model=MODEL,
+        model=GPT_MODEL,
         max_tokens=5,
         temperature=TEMPERATURE,
         prompt="1,2,3,",
@@ -63,6 +65,7 @@ async def async_main() -> None:
     # Note that the for loop will not exit until *all* of the data has been processed.
     async for chunk in response:
         print(chunk.to_json())
+
 
 # run asynchronous and synchronous main functions
 if __name__ == "__main__":

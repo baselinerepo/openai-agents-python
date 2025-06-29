@@ -1,9 +1,14 @@
 # Example of using OpenAI's AsyncOpenAI client to transcribe audio from the microphone.
 # This example requires the `openai` package and an active OpenAI API key.
+# import dependencies
 import os
 import numpy as np
 from openai import AsyncOpenAI
 from openai.helpers import Microphone
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Record audio from the microphone asynchronously.
 async def record_audio():
@@ -16,7 +21,7 @@ async def record_audio():
 async def main() -> None:
 
     try:
-        # Initialize OpenAI client
+        # Initialize the OpenAI client with your API key
         client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
         # Start listening to the microphone
@@ -38,7 +43,5 @@ async def main() -> None:
 
 # Run the main function asynchronously
 if __name__ == "__main__":
-    # run the main function asynchronously
     import asyncio
-
     asyncio.run(main())

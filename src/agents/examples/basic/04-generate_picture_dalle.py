@@ -1,5 +1,6 @@
 # Example of using the OpenAI Python client to interact with the API
 # to generate an image using DALL-E 3 based on a given prompt.
+# import dependencies
 import os
 from dotenv import load_dotenv
 from openai import AsyncOpenAI
@@ -11,14 +12,14 @@ load_dotenv()
 client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # Define the model to use for image generation
-model = "dall-e-3"
+GPT_MODEL = "dall-e-3"
 
 # Function to generate an image based on a text prompt
 async def generate_image(prompt) -> None:
     try:
         # Generate an image based on the prompt
         response = await client.images.generate(
-            model=model,
+            model=GPT_MODEL,
             prompt=prompt,
             n=1,
             size="1024x1024",
@@ -29,6 +30,7 @@ async def generate_image(prompt) -> None:
 
     except Exception as e:
         print(f"An error occurred: {e}")
+
 
 # run function asynchronously
 if __name__ == "__main__":

@@ -6,7 +6,7 @@ from openai import AsyncOpenAI
 client = AsyncOpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
 # Model configuration
-MODEL: str = "gpt-4o-mini"
+GPT_MODEL: str = "gpt-4o-mini"
 TEMPERATURE: float = 0.0
 
 async def main():
@@ -14,7 +14,7 @@ async def main():
     # Create a async standard chat completion request to the GPT-4o-mini model
     print("---- GPT-4o-mini Chat Completion Standard Request ----")
     response = await client.chat.completions.create(
-        model=MODEL,
+        model=GPT_MODEL,
         max_tokens=50,
         temperature=TEMPERATURE,
         messages=[
@@ -35,7 +35,7 @@ async def main():
     # Create a async chat completion request to the GPT-4o-mini model with streaming enabled
     print("\n---- GPT-4o-mini Chat Completion Streaming Request ----")
     async for chunk in await client.chat.completions.create(
-        model=MODEL,
+        model=GPT_MODEL,
         max_tokens=500,
         temperature=TEMPERATURE,
         messages=[
@@ -57,7 +57,7 @@ async def main():
     # Print the response headers from the non-streaming request
     print("\n---- GPT-4o-mini Chat Completion Response Headers ----")
     response = await client.chat.completions.with_raw_response.create(
-        model=MODEL,
+        model=GPT_MODEL,
         max_tokens=50,
         temperature=TEMPERATURE,
         messages=[
@@ -76,7 +76,7 @@ async def main():
     print(completion.choices[0].message.content)
 
 
+# run function asynchronously
 if __name__ == "__main__":
-    # Run the main function using asyncio
     import asyncio
     asyncio.run(main())
