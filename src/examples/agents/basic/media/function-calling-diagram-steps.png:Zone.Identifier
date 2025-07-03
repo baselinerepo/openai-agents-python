@@ -1,0 +1,4 @@
+[ZoneTransfer]
+ZoneId=3
+ReferrerUrl=https://platform.openai.com/
+HostUrl=https://cdn.openai.com/API/docs/images/function-calling-diagram-steps.png
