@@ -3,6 +3,8 @@ import os
 import sqlite3
 import json
 
+from agents import Agent, Runner, TResponseInputItem
+from dotenv import load_dotenv
 from openai import OpenAI
 from typing import List, Dict, Any
 
@@ -16,6 +18,9 @@ Workflow:
 # define constant
 GPT_MODEL: str = "gpt-4o-mini"
 TEMPERATURE: float = 0.0
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Initialise the sqlite client
 sqlite_db_conn = sqlite3.connect('../data/chinook.db')
@@ -116,25 +121,27 @@ db_schema_string = "\n".join(
 # JSON schema for the tool with precise latitude and longitude
 tools = [{
     "type": "function",
-    "name": "query_database",
-    "description": "Use this function to answer user questions about music. Input should be a fully formed SQL query.",
-    "parameters": {
-        "type": "object",
-        "properties": {
-            "query": {
-                "type": "string",
-                "description": f"""
-                    SQL query extracting info to answer the user's question.
-                    SQL should be written using the database schema:
-                    {db_schema_string}
-                    The query should be returned in plain text, not in JSON.
-                """,
-            }
+    "function": {
+        "name": "query_database",
+        "description": "Use this function to answer user questions about music. Input should be a fully formed SQL query.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "type": "string",
+                    "description": f"""
+                        SQL query extracting info to answer the user's question.
+                        SQL should be written using the database schema:
+                        {db_schema_string}
+                        The query should be returned in plain text, not in JSON.
+                    """,
+                }
+            },
+            "required": ["query"],
+            "additionalProperties": False,
         },
-        "required": ["query"],
-        "additionalProperties": False,
-    },
-    "strict": True # will ensure function calls reliably adhere to the function schema
+        "strict": True # will ensure function calls reliably adhere to the function schema
+    }
 }]
 
 
@@ -163,6 +170,7 @@ def generate_sql_query(prompt: str):
         ],
         tools=tools,
     )
+
     return chat_completions_message
 
 
@@ -191,15 +199,14 @@ def extract_execute_sql(prompt: str):
     #)
     """
 
-    chat_completions_message = generate_sql_query(prompt)
-    tool_call = chat_completions_message.choices[0].message.tool_calls[0]
+    chat_completions_messages = generate_sql_query(prompt)
+    tool_call = chat_completions_messages.choices[0].message.tool_calls[0]
 
     if tool_call.function.name == 'query_database':
         query = json.loads(tool_call.function.arguments)["query"]
         dataset = query_database(query)
-        print(query)
-        print(dataset)
-
+        print(f"GPT Generated SQL:\n{query}")
+        print(f"Dataset: {dataset}")
 
 
 ##---------------------- AI Integration Ends -----------------------##
@@ -209,15 +216,19 @@ if __name__ == "__main__":
     #print(get_table_names())
     #print(get_column_names("employee"))
     #print(get_database_info())
-    print(extract_execute_sql("Who are the top 5 artists by number of tracks?"))
+
+    while True:
+        user_input = input("Enter a prompt: ")
+
+        #extract_execute_sql("Who are the top 5 artists by number of tracks?")
+        extract_execute_sql(user_input)
+
+# dispose objects
+sqlite_db_conn.close()
+gpt_client.close()
 
 
-    # dispose objects
-    sqlite_db_conn.close()
-    gpt_client.close()
-
-
-
+# Enter a prompt: Who are the top 5 artists by number of tracks?
 # SAMPLE OUTPUT QUERY AND DATASET FOR USER PROMPT
 # SELECT Artist.Name, COUNT(Track.TrackId) AS TrackCount 
 # FROM Artist 
