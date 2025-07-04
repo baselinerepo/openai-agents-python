@@ -3,16 +3,15 @@ import os
 import sqlite3
 import json
 
-from agents import Agent, Runner, TResponseInputItem
 from dotenv import load_dotenv
 from openai import OpenAI
 from typing import List, Dict, Any
 
 """
 Workflow:
-1. Connecting to the external database and schema oveview
+1. Connect to the external database and schema overview
 2. Generating SQL Queries with GPT based on user prompts
-3. Executing SQL Queries
+3. Executing generated SQL Queries with associated database schema
 """
 
 # define constant
