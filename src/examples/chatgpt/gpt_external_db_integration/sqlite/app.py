@@ -27,7 +27,7 @@ gpt_client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 # define db functions
 def get_table_names():
     """
-    Returns list of user tables in database
+    Returns list of user table names in database
     """
     table_names = []
     tables = sqlite_db_conn.execute('SELECT name FROM sqlite_master WHERE type="table"')
@@ -116,26 +116,25 @@ db_schema_string = "\n".join(
 # JSON schema for the tool with precise latitude and longitude
 tools = [{
     "type": "function",
-    "function": {
-        "name": "query_database",
-        "description": "Use this function to answer user questions about music. Input should be a fully formed SQL query.",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "query": {
-                    "type": "string",
-                    "description": f"""
-                        SQL query extracting info to answer the user's question.
-                        SQL should be written using the database schema:
-                        {db_schema_string}
-                        The query should be returned in plain text, not in JSON.
-                    """,
-                }
-            },
-            "required": ["query"],
-            "additionalProperties": False,
+    "name": "query_database",
+    "description": "Use this function to answer user questions about music. Input should be a fully formed SQL query.",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "query": {
+                "type": "string",
+                "description": f"""
+                    SQL query extracting info to answer the user's question.
+                    SQL should be written using the database schema:
+                    {db_schema_string}
+                    The query should be returned in plain text, not in JSON.
+                """,
+            }
         },
-    }
+        "required": ["query"],
+        "additionalProperties": False,
+    },
+    "strict": True # will ensure function calls reliably adhere to the function schema
 }]
 
 
@@ -164,8 +163,43 @@ def generate_sql_query(prompt: str):
         ],
         tools=tools,
     )
-
     return chat_completions_message
+
+
+def extract_execute_sql(prompt: str):
+    """
+    #-------------------------------------------------------------
+    # Extract SQL query from chat completions arguments
+    # Execute the sql query_database with the provided arguments
+    #-------------------------------------------------------------
+    # SAMPLE OUTPUT CHAT COMPLETIONS MESSAGE
+    #-------------------------------------------------------------
+    #ChatCompletionMessage(
+    #    content=None,
+    #    refusal=None,
+    #    role='assistant',
+    #    annotations=[],
+    #    audio=None, 
+    #    function_call=None,
+    #    tool_calls=[ChatCompletionMessageToolCall(
+    #        id='call_l0XoM0PhJjwk8rh0P8tHLx2Z',
+    #        function=Function(
+    #            arguments='{"query":"SELECT Artist.Name, COUNT(Track.TrackId) AS TrackCount \\nFROM Artist \\nJOIN Album ON Artist.ArtistId = Album.ArtistId \\nJOIN Track ON Album.AlbumId = Track.AlbumId \\nGROUP BY Artist.ArtistId \\nORDER BY TrackCount DESC \\nLIMIT 5;"}',
+    #            name='query_database'
+    #        ),
+    #        type='function')]
+    #)
+    """
+
+    chat_completions_message = generate_sql_query(prompt)
+    tool_call = chat_completions_message.choices[0].message.tool_calls[0]
+
+    if tool_call.function.name == 'query_database':
+        query = json.loads(tool_call.function.arguments)["query"]
+        dataset = query_database(query)
+        print(query)
+        print(dataset)
+
 
 
 ##---------------------- AI Integration Ends -----------------------##
@@ -175,26 +209,7 @@ if __name__ == "__main__":
     #print(get_table_names())
     #print(get_column_names("employee"))
     #print(get_database_info())
-
-
-    #-------------------------------------------------------------
-    # Extract SQL query from chat completions arguments
-    # Executing GPT query
-    #-------------------------------------------------------------
-    ## SAMPLE OUTPUT CHAT COMPLETIONS MESSAGE
-    # ChatCompletionMessage(content=None, refusal=None, role='assistant', annotations=[], audio=None, 
-    # function_call=None, tool_calls=[ChatCompletionMessageToolCall(id='call_l0XoM0PhJjwk8rh0P8tHLx2Z', 
-    # function=Function(arguments='{"query":"SELECT Artist.Name, COUNT(Track.TrackId) AS TrackCount \\nFROM Artist \\nJOIN Album ON Artist.ArtistId = Album.ArtistId \\nJOIN Track ON Album.AlbumId = Track.AlbumId \\nGROUP BY Artist.ArtistId \\nORDER BY TrackCount DESC \\nLIMIT 5;"}', name='query_database'), 
-    # type='function')])
-    #-------------------------------------------------------------
-    chat_completion_message = generate_sql_query("Who are the top 5 artists by number of tracks?")
-    tool_call = chat_completion_message.choices[0].message.tool_calls[0]
-
-    if tool_call.function.name == 'query_database':
-        query = json.loads(tool_call.function.arguments)["query"]
-        dataset = query_database(query)
-        print(query)
-        print(dataset)
+    print(extract_execute_sql("Who are the top 5 artists by number of tracks?"))
 
 
     # dispose objects
