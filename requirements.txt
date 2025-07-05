@@ -9,3 +9,4 @@ pandas
 ipython
 jinja2
 typing_extensions
+notebook
