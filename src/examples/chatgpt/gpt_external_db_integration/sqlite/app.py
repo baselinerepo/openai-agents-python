@@ -2,6 +2,7 @@
 import os
 import sqlite3
 import json
+import pathlib
 
 from dotenv import load_dotenv
 from openai import OpenAI
@@ -21,8 +22,10 @@ TEMPERATURE: float = 0.0
 # Load environment variables from .env file
 load_dotenv()
 
+db_file_path = pathlib.Path(__file__).parent.parent / 'data' / 'sqlite' / 'chinook.db'
+
 # Initialise the sqlite client
-sqlite_db_conn = sqlite3.connect('../data/sqlite/chinook.db')
+sqlite_db_conn = sqlite3.connect(db_file_path)
 
 # Initialize the OpenAI client with the API key
 gpt_client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
@@ -52,6 +55,13 @@ def get_column_names(table_name: str):
     
     return column_names
 
+def get_table_schema(table_name: str):
+    """
+    Returns a string representation of the table schema.
+    """
+    tbl_schema = sqlite_db_conn.execute(f"SELECT sql FROM sqlite_schema WHERE type='table' AND name='{table_name}';").fetchone()
+    return tbl_schema
+
 
 def get_database_info():
     """
@@ -64,6 +74,17 @@ def get_database_info():
 
     return table_dicts
 
+
+def get_database_schema():
+    """
+    Returns list of dicts containing the table name and columns for each table in the database.
+    """
+    database_schema = []
+    for table_name in get_table_names():
+        table_schema = get_table_schema(table_name)
+        database_schema.append(table_schema)
+
+    return database_schema
 
 ##---------------------- AI Integration Begins -----------------------##
 
@@ -131,7 +152,7 @@ tools = [{
                     "description": f"""
                         SQL query extracting info to answer the user's question.
                         SQL should be written using the database schema:
-                        {db_schema_string}
+                        {get_database_schema()}
                         The query should be returned in plain text, not in JSON.
                     """,
                 }
@@ -204,8 +225,8 @@ def extract_execute_sql(prompt: str):
     if tool_call.function.name == 'query_database':
         query = json.loads(tool_call.function.arguments)["query"]
         dataset = query_database(query)
-        print(f"GPT Generated SQL:\n{query}")
-        print(f"Dataset: {dataset}")
+        print(f"GPT Generated SQL query:\n{query}")
+        print(f"Returned Resultset:\n{dataset}")
 
 
 ##---------------------- AI Integration Ends -----------------------##
@@ -218,7 +239,6 @@ if __name__ == "__main__":
 
     while True:
         user_input = input("Enter a prompt: ")
-
         #extract_execute_sql("Who are the top 5 artists by number of tracks?")
         extract_execute_sql(user_input)
 
@@ -233,7 +253,7 @@ gpt_client.close()
 # FROM Artist 
 # JOIN Album ON Artist.ArtistId = Album.ArtistId 
 # JOIN Track ON Album.AlbumId = Track.AlbumId 
-# GROUP BY Artist.Name 
+# GROUP BY Artist.ArtistId
 # ORDER BY TrackCount DESC 
 # LIMIT 5;
 # [('Iron Maiden', 213), ('U2', 135), ('Led Zeppelin', 114), ('Metallica', 112), ('Lost', 92)]
