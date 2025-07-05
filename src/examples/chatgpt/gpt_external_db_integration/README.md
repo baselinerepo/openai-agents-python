@@ -5,15 +5,21 @@
 ### Use Cases
 
 **Query Suggestions**: Automating SQL query generation.
+
 **Code Review**: Identifying performance and security risks. GPT can review existing SQL queries and suggest optimisations, such as indexing, reducing nested subqueries, or spotting potential SQL injection vulnerabilities, helping you maintain efficient and secure code.
+
 **Data Cleaning**: Formatting and transforming data. GPT can assist in creating SQL scripts to clean up data, such as removing duplicates, formatting dates, or standardising text entries, streamlining the data preparation process for analysis.
+
 **Report Generation**: Writing queries for custom reports. By providing GPT with the table schema and report requirements, you can quickly generate queries to extract the necessary data for dashboards, summaries, or detailed reports.
+
 **Learning and Troubleshooting**: Explaining SQL concepts or debugging errors. GPT can help clarify SQL functions, syntax, and error messages, making it a valuable resource for both beginners learning SQL and experienced users troubleshooting complex issues.
 
 ## Best practices
 
 **Verify Output**: Always double-check AI-generated queries before running them. While GPT can be highly accurate, reviewing the queries for correctness is important, especially when dealing with complex logic or large datasets.
+
 **Limit Sensitive Data**: When sharing table schemas or prompts with GPT, be mindful of data privacy. To maintain data security, avoid including sensitive personal data, passwords, or confidential business details.
+
 **Performance Monitoring**: Use ChatGPT for non-critical operations or as a starting point for query generation. After obtaining the query, test its performance on a smaller subset of data before applying it to production environments to ensure it runs efficiently.
 
 ## How To Generate SQL Server Queries With GPT
