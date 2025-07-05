@@ -22,7 +22,7 @@ TEMPERATURE: float = 0.0
 load_dotenv()
 
 # Initialise the sqlite client
-sqlite_db_conn = sqlite3.connect('../data/chinook.db')
+sqlite_db_conn = sqlite3.connect('../data/sqlite/chinook.db')
 
 # Initialize the OpenAI client with the API key
 gpt_client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
