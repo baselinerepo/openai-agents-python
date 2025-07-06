@@ -10,3 +10,5 @@ ipython
 jinja2
 typing_extensions
 notebook
+pyodbc
+sqlite3
