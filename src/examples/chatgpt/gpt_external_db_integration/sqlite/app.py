@@ -1,19 +1,21 @@
+"""
+Workflow:
+Connects the SQLite database using sqlite3
+This script integrates with the OpenAI GPT model to generate SQL queries based on user prompts.
+It connects to a SQLite database, retrieves schema information, and allows users to query the database using
+natural language prompts that are converted into SQL queries by the GPT model.
+This is a simple example of how to use OpenAI's GPT model to interact with an external database.
+"""
+
 # import libraries
-import os
-import sqlite3
 import json
+import os
 import pathlib
+import sqlite3
 
 from dotenv import load_dotenv
 from openai import OpenAI
 from typing import List, Dict, Any
-
-"""
-Workflow:
-1. Connect to the external database and schema overview
-2. Generating SQL Queries with GPT based on user prompts
-3. Executing generated SQL Queries with associated database schema
-"""
 
 # define constant
 GPT_MODEL: str = "gpt-4o-mini"
@@ -22,10 +24,12 @@ TEMPERATURE: float = 0.0
 # Load environment variables from .env file
 load_dotenv()
 
+# define database file path
 db_file_path = pathlib.Path(__file__).parent.parent / 'data' / 'sqlite' / 'chinook.db'
 
-# Initialise the sqlite client
-sqlite_db_conn = sqlite3.connect(db_file_path)
+# Initialise the sqlite client and cursor
+sqlite_db_cnxn = sqlite3.connect(db_file_path, autocommit=True)
+cursor = sqlite_db_cnxn.cursor()
 
 # Initialize the OpenAI client with the API key
 gpt_client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
@@ -37,7 +41,7 @@ def get_table_names():
     Returns list of user table names in database
     """
     table_names = []
-    tables = sqlite_db_conn.execute('SELECT name FROM sqlite_master WHERE type="table"')
+    tables = cursor.execute('SELECT name FROM sqlite_master WHERE type="table"')
     for table in tables.fetchall():
         table_names.append(table[0])
     
@@ -49,7 +53,7 @@ def get_column_names(table_name: str):
     Returns list of columns in database
     """
     column_names = []
-    columns = sqlite_db_conn.execute(f"PRAGMA table_info('{table_name}');").fetchall()
+    columns = cursor.execute(f"PRAGMA table_info('{table_name}');").fetchall()
     for col in columns:
         column_names.append(col[1])
     
@@ -59,7 +63,7 @@ def get_table_schema(table_name: str):
     """
     Returns a string representation of the table schema.
     """
-    tbl_schema = sqlite_db_conn.execute(f"SELECT sql FROM sqlite_schema WHERE type='table' AND name='{table_name}';").fetchone()
+    tbl_schema = cursor.execute(f"SELECT sql FROM sqlite_schema WHERE type='table' AND name='{table_name}';").fetchone()
     return tbl_schema
 
 
@@ -166,7 +170,7 @@ tools = [{
 
 
 def query_database(query):
-    results = str(sqlite_db_conn.execute(query).fetchall())
+    results = str(sqlite_db_cnxn.execute(query).fetchall())
     return results
 
 #print(query_database('Select * from album'))
@@ -243,7 +247,7 @@ if __name__ == "__main__":
         extract_execute_sql(user_input)
 
 # dispose objects
-sqlite_db_conn.close()
+sqlite_db_cnxn.close()
 gpt_client.close()
 
 
