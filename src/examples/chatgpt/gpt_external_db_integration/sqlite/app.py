@@ -247,6 +247,7 @@ if __name__ == "__main__":
         extract_execute_sql(user_input)
 
 # dispose objects
+cursor.close()
 sqlite_db_cnxn.close()
 gpt_client.close()
 
