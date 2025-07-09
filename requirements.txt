@@ -12,3 +12,4 @@ typing_extensions
 notebook
 pyodbc
 sqlite3
+azure-functions
