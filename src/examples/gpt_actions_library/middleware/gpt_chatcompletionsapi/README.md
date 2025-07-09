@@ -34,7 +34,7 @@ Building your own middleware gives you more control over the application’s beh
 
 ### Workflow Steps
 
-1. GPT generates a SQL query based on prompt
+1. **GPT generates a SQL query based on prompt**
 
 GPTs are very good at writing SQL queries based on a user’s natural language prompt. You can improve the GPT’s query generation capabilities by giving it access to the database schema
 
@@ -82,3 +82,193 @@ You are a data analyst. Your job is to assist users with their business question
 3. Use the response data to answer the user's question.
 4. If necessary, use code interpreter to perform additional analysis on the data until you are able to answer the user's question.
 ```
+
+2. **GPT sends SQL query to middleware**
+
+In order for our GPT to communicate with our middleware, we’ll configure a GPT Action. The middleware needs to present a REST API endpoint which accepts a SQL query string. You can design this interface in several ways. Here is an example of an OpenAPI schema for a simple endpoint which accepts a “q” parameter in a POST operation:
+
+```bash
+openapi: 3.1.0
+info:
+  title: PostgreSQL API
+  description: API for querying a PostgreSQL database
+  version: 1.0.0
+servers:
+  - url: https://my.middleware.com/v1
+    description: middleware service
+paths:
+  /api/query:
+    post:
+      operationId: databaseQuery
+      summary: Query a PostgreSQL database
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                q:
+                  type: string
+                  example: select * from users
+      responses:
+        "200":
+          description: database records
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  openaiFileResponse:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                          description: The name of the file.
+                        mime_type:
+                          type: string
+                          description: The MIME type of the file.
+                        content:
+                          type: string
+                          format: byte
+                          description: The content of the file in base64 encoding.
+        "400":
+          description: Bad Request. Invalid input.
+        "401":
+          description: Unauthorized. Invalid or missing API key.
+      security:
+        - ApiKey: []
+components:
+  securitySchemes:
+    ApiKey:
+      type: apiKey
+      in: header
+      name: X-Api-Key
+  schemas: {}
+```
+
+A note on **authentication**: The API interface in the above example accepts a single system-level API key which is stored along with the GPT’s configuration and used to authenticate requests for all GPT users. GPT Actions also support OAuth authentication, which enables user-level authentication and authorization.
+
+Because the user is authenticating with middleware and not directly with the underlying database, enforcing user-level access (table or row-level permissions) requires more effort. However, it may be required for GPTs where users have different levels of access to the underlying database.
+
+In order to enforce user-level permissions, your middleware should:
+
+1. Receive the user’s metadata provided by the IdP during the OAuth flow and extract their identifying information
+2. Query the database to retrieve the user’s database permissions
+3. Issue a command to the database to enforce the relevant permissions for the remainder of the session
+
+In order to maintain a good user experience, you’ll want to dynamically retrieve the available database schema for each user as opposed to including the schema data in the GPT instructions directly. This ensures that the GPT only has access to tables which it can query on behalf of the current user.
+
+
+### Middleware forwards SQL query to database
+
+Your middleware will implement a database driver or client library to enable it to query the PostgreSQL database directly.
+
+During this workflow step, the middleware application needs to extract the SQL string from the request it received from the GPT and forward it to the database using the methods provided by the client library.
+
+A note on read-only permissions: Given that this design pattern results in your database processing arbitrary AI-generated SQL queries, you should ensure that the middleware application has read-only permissions on the database. This ensures that the AI-generated queries cannot insert new data or modify existing data. If write access is required for your use-case, consider deploying operation-specific endpoints rather than accepting arbitrary SQL.
+
+
+### Database returns records to middleware
+
+Depending on the client library you have implemented, your middleware may receive records in a variety of formats. One common pattern is for your middleware to receive an array of JSON objects, each object representing a database record matching the query:
+
+```bash
+[
+  {
+    "account_id": 1,
+    "number_of_users": 10,
+    "total_revenue": 43803.96,
+    "revenue_per_user": 4380.40
+  },
+  {
+    "account_id": 2,
+    "number_of_users": 12,
+    "total_revenue": 77814.84,
+    "revenue_per_user": 6484.57
+  },
+  ...
+]
+```
+
+### Middleware converts records into base64-encoded CSV file
+
+In order for ChatGPT to analyze large numbers of records, it needs access to data in a CSV format. The GPT Actions interface allows GPTs to receive base64-encoded files of up to 10mb in size.
+
+Your middleware needs to perform two actions:
+
+Convert records into a CSV format
+
+Here’s an example of how your middleware could convert an array of JSON objects into a CSV file:
+
+```bash
+import json
+import csv
+
+# Sample JSON array of objects
+json_data = '''
+[
+    {"account_id": 1, "number_of_users": 10, "total_revenue": 43803.96, "revenue_per_user": 4380.40}, 
+    {"account_id": 2, "number_of_users": 12, "total_revenue": 77814.84, "revenue_per_user": 6484.57}
+]
+'''
+
+# Load JSON data
+data = json.loads(json_data)
+
+# Define the CSV file name
+csv_file = 'output.csv'
+
+# Write JSON data to CSV
+with open(csv_file, 'w', newline='') as csvfile:
+    # Create a CSV writer object
+    csvwriter = csv.writer(csvfile)
+    
+    # Write the header (keys of the first dictionary)
+    header = data[0].keys()
+    csvwriter.writerow(header)
+    
+    # Write the data rows
+    for row in data:
+        csvwriter.writerow(row.values())
+
+print(f"JSON data has been written to {csv_file}")
+```
+
+Base64-encode the CSV file
+
+Here’s an example of how your middleware could base64-encode the CSV file generated in the previous step:
+
+```bash
+import base64 
+
+# Base64 encode the CSV file
+encoded_string = base64.b64encode(open('output.csv', 'rb').read()).decode('utf-8')
+
+print("Base64 Encoded CSV:")
+print(encoded_string)
+```
+
+### Middleware returns base64-encoded CSV file to GPT
+
+In order for the GPT Actions interface to process the base-64 encoded CSV file, the response returned by your middleware must contain an `openaiFileResponse` parameter. The value provided must be an array of file objects or links to files (see the [Actions documentation](https://platform.openai.com/docs/actions/sending-files/returning-files) for more details). For the purposes of this example, we will work with an array of file objects.
+
+Here is an example of what a valid response body looks like:
+
+```bash
+{
+  "openaiFileResponse": [
+    {
+      "name": "output.csv",
+      "mime_type": "text/csv",
+      "content": "ImFjY291bn...NC41NyI="
+    }
+  ]
+}
+```
+
+### GPT processes returned file
+
+Once your GPT receives the base64-encoded CSV file, it will automatically decode the file and process it to answer the user’s question. This may involve using code interpreter to perform additional analysis against the CSV file, which happens the same way as if a user had uploaded the CSV file via the prompt.
