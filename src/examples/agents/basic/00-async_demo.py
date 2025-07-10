@@ -1,9 +1,14 @@
 # This script demonstrates how to use the OpenAI API to get a async response from the GPT-4o-mini model.
 import os
 from openai import AsyncOpenAI
+from dotenv import load_dotenv, find_dotenv
+
+# load environment variables from .env file
+# override attribute avoids caching the key in the code
+load_dotenv(find_dotenv(), override=True)
 
 # Initialize the OpenAI client with the API key
-client = AsyncOpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+client = AsyncOpenAI()
 
 # Model configuration
 GPT_MODEL: str = "gpt-4o-mini"

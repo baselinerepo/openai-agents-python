@@ -1,11 +1,12 @@
 # Example of using OpenAI's Python client to make streaming requests
 # import dependencies
 import os
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 from openai import OpenAI, AsyncOpenAI
 
 # Load environment variables from .env file
-load_dotenv()
+# override attribute avoids caching the key in the code
+load_dotenv(find_dotenv(), override=True)
 
 # The synchronous main function
 def sync_main() -> None:

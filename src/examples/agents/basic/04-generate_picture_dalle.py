@@ -2,11 +2,12 @@
 # to generate an image using DALL-E 3 based on a given prompt.
 # import dependencies
 import os
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 from openai import AsyncOpenAI
 
 # Load environment variables from .env file
-load_dotenv()
+# override attribute avoids caching the key in the code
+load_dotenv(find_dotenv(), override=True)
 
 # Initialize the OpenAI client with your API key
 client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))

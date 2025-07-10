@@ -1,12 +1,13 @@
 # Example of using OpenAI's structured output feature with Pydantic models
 # import dependencies
 import os
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 from openai import AsyncOpenAI
 from pydantic import BaseModel
 
 # Load environment variables from .env file
-load_dotenv()
+# override attribute avoids caching the key in the code
+load_dotenv(find_dotenv(), override=True)
 
 # Initialize the OpenAI client with your API key
 client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))

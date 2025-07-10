@@ -5,10 +5,11 @@ import os
 import numpy as np
 from openai import AsyncOpenAI
 from openai.helpers import Microphone
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 
 # Load environment variables from .env file
-load_dotenv()
+# override props avoids caching the key in the code
+load_dotenv(find_dotenv(), override=True)
 
 # Record audio from the microphone asynchronously.
 async def record_audio():

@@ -1,10 +1,11 @@
 # This script demonstrates how to use the OpenAI API to get a response from the GPT-4o-mini model.
 import os
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 from openai import OpenAI
 
 # gets the api key from the .env file
-load_dotenv()
+# override attribute avoids caching the key in the code
+load_dotenv(find_dotenv(), override=True)
 
 # Initialize the OpenAI client with the API key
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))

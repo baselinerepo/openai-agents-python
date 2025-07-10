@@ -1,12 +1,13 @@
 # This script demonstrates how to use the OpenAI API to convert text to speech asynchronously.
 # import dependencies
 import os
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 from openai import AsyncOpenAI
 from openai.helpers import LocalAudioPlayer
 
 # Load environment variables from .env file
-load_dotenv()
+# override attribute avoids caching the key in the code
+load_dotenv(find_dotenv(), override=True)
 
 # Initialize the Async OpenAI client with your API key
 openai = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
