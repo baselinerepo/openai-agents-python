@@ -19,18 +19,22 @@ Setp 2: Install ODBC Driver for SQL Server
 
     # Download the package to configure the Microsoft repo
     curl -sSL -O https://packages.microsoft.com/config/ubuntu/$(grep VERSION_ID /etc/os-release | cut -d '"' -f 2)/packages-microsoft-prod.deb
+
     # Install the package
     sudo dpkg -i packages-microsoft-prod.deb
+
     # Delete the file
     rm packages-microsoft-prod.deb
 
     # Install the driver
     sudo apt-get update
     sudo ACCEPT_EULA=Y apt-get install -y msodbcsql18
+
     # optional: for bcp and sqlcmd
     sudo ACCEPT_EULA=Y apt-get install -y mssql-tools18
     echo 'export PATH="$PATH:/opt/mssql-tools18/bin"' >> ~/.bashrc
     source ~/.bashrc
+
     # optional: for unixODBC development headers
     sudo apt-get install -y unixodbc-dev
     # bash script end
@@ -46,6 +50,7 @@ from openai import OpenAI
 from typing import List, Dict, Any
 
 # Load environment variables from .env file
+# override attribute avoids caching the key in the code
 load_dotenv(find_dotenv(), override=True)
 
 # define openai constant
@@ -59,10 +64,10 @@ MSSQL_SERVER_HOST: str = os.environ.get("MSSQL_DATA_SOURCE")
 MSSQL_DATABASE: str = os.environ.get("MSSQL_INITIAL_CATALOG")
 MSSQL_UID: str = os.environ.get("MSSQL_USER_ID")
 MSSQL_PWD: str = os.environ.get("MSSQL_USER_PWD")
-MSSQL_ODBC_CXN_STR: str = os.environ.get("MSSQL_ODBC_CXN_STR", "")
+MSSQL_PYODBC_CXN_STR: str = os.environ.get("MSSQL_PYODBC_CXN_STR", "")
 MSSQL_OLEDB_CXN_STR: str = os.environ.get("MSSQL_OLEDB_CXN_STR", "")
 
-print(MSSQL_ODBC_CXN_STR)
+print(MSSQL_PYODBC_CXN_STR)
 
 # Initialize the SQL Server client
 sql_server_odbc_conn = pyodbc.connect(
