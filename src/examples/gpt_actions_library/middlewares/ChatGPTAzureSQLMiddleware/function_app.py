@@ -1,22 +1,57 @@
-"""
---------------------------------------------------------------------
-Usage: Azure Function App for SQL Connector Middleware
-Description: This Azure Function App provides middleware for executing SQL queries,
-retrieving database schema, and executing.
-
-Step 1: Set up the Azure Function App with the necessary environment variables:
-Step 2: Local testing can be done using the Azure Functions Core Tools.
-- sudo apt-get install azure-functions-core-tools-4
-- or use pip install azure-functions-core-tools
-Step 3: Run the function app locally:
-- func start
-- Worker process started and initialized on port localhost:7071.
-- http://localhost:7071/api/sqlconnector/query
-Step 4: Test the endpoints using tools like Postman or curl.
-- POST /api/sqlconnector/query with JSON body containing "query" and optional "parameters"
---------------------------------------------------------------------
-"""
-
+#--------------------------------------------------------------------
+# Usage: Azure Function App for SQL Connector Middleware
+# Description: This Azure Function App provides middleware for executing SQL queries,
+# retrieving database schema, and executing procedures.
+#
+# Step 1: Set up the Azure Function App with the necessary environment variables:
+#
+# Step 2: Local testing can be done using the Azure Functions Core Tools.
+# - sudo apt-get install azure-functions-core-tools-4
+# - or use pip install azure-functions-core-tools
+#
+# Step 3: Run the function app locally:
+# - func start
+# - Worker process started and initialized on port localhost:7071
+# - http://localhost:7071/api/sqlconnector/query
+#
+# Step 4: Test the endpoints using tools like Postman or curl.
+#
+# - Three Main Endpoints:
+#
+# POST /api/sql/query - Execute SELECT queries
+# GET /api/sql/schema - Get database schema information
+# POST /api/sql/procedure - Execute stored procedures
+#
+# - POST /api/sqlconnector/query with JSON body containing "query" and optional "parameters"
+#
+# Example Usage from GPT:
+# json// Query data
+# POST /api/sqlconnector/query
+# {
+#   "query": "SELECT TOP 10 * FROM SalesLT.Customer WHERE Title=@title ORDER BY CustomerID",
+#   "parameters": {
+#     "title": "Mr."
+#   }
+# }
+#
+#
+#- GET /api/sqlconnector/schema with optional "table" query parameter
+#
+# // Get schema
+#GET /api/sqlconnector/schema?table=Users
+#
+#
+# - POST /api/sqlconnector/procedure with JSON body containing "procedureName" and optional "parameters"
+#
+# POST /api/sqlconnector/procedure
+# {
+#   "procedureName": "GetUsersByRole",
+#   "parameters": {
+#     "role": "admin"
+#   }
+# }
+#
+#--------------------------------------------------------------------
 import azure.functions as func
 import time
 import os
@@ -38,6 +73,7 @@ DANGEROUS_SQL_KEYWORDS = ['CREATE','DROP','DELETE','ALTER','INSERT','UPDATE','TR
 # function app configuration
 app = func.FunctionApp()
 
+# POST /api/sqlconnector/query
 @app.route(route="sqlconnector/{route}", auth_level=func.AuthLevel.FUNCTION, methods=["POST"])
 def sqlconnector_query(req: func.HttpRequest) -> func.HttpResponse:
     try:
@@ -53,13 +89,15 @@ def sqlconnector_query(req: func.HttpRequest) -> func.HttpResponse:
         )
 
 
-@app.route(route="sqlconnector/schema", auth_level=func.AuthLevel.ANONYMOUS, methods=["GET"])
+# GET /api/sqlconnector/schema?table=Users
+@app.route(route="sqlconnector/schema", auth_level=func.AuthLevel.FUNCTION, methods=["GET"])
 def sqlconnector_schema(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed sql schema request.')
     req.route_params['route'] = 'schema'
     return main(req)
 
 
+# POST /api/sqliteconnector/procedure
 @app.route(route="sqlconnector/procedure", auth_level=func.AuthLevel.ANONYMOUS, methods=["POST"])
 def sqlconnector_procedure(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed sql stored procedure request.')
@@ -140,9 +178,6 @@ def execute_sql_query(query: str, parameters: Dict[str, Any] = None) -> Dict[str
 
     with get_dbConnection() as cnxn:
         cur = cnxn.cursor()
-        #cur.execute(query, parameters or {})
-        #columns = [column[0] for column in cur.description]
-        #results = [dict(zip(columns, row)) for row in cur.fetchall()]
 
         # prepare parameterized query
         if parameters:
@@ -159,7 +194,7 @@ def execute_sql_query(query: str, parameters: Dict[str, Any] = None) -> Dict[str
 
             print(f"Modified Query: {modified_query}")
 
-            #cur.execute(modified_query, param_values) => use for sqlite
+            #cur.execute(modified_query, param_values or {}) => use for sqlite
             cur.execute(modified_query) # => execute a single parameterized sqlserver query
         else:
             cur.execute(query)
