@@ -1,14 +1,20 @@
 """
-##--------------------------------------------------------------------
+--------------------------------------------------------------------
 Usage: Azure Function App for SQL Connector Middleware
 Description: This Azure Function App provides middleware for executing SQL queries,
 retrieving database schema, and executing.
 
 Step 1: Set up the Azure Function App with the necessary environment variables:
-- AZURE_SQL_CNXN_STRING: Connection string for the Azure SQL Database.
 Step 2: Local testing can be done using the Azure Functions Core Tools.
 - sudo apt-get install azure-functions-core-tools-4
-##--------------------------------------------------------------------
+- or use pip install azure-functions-core-tools
+Step 3: Run the function app locally:
+- func start
+- Worker process started and initialized on port localhost:7071.
+- http://localhost:7071/api/sqlconnector/query
+Step 4: Test the endpoints using tools like Postman or curl.
+- POST /api/sqlconnector/query with JSON body containing "query" and optional "parameters"
+--------------------------------------------------------------------
 """
 
 import azure.functions as func

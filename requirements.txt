@@ -13,4 +13,6 @@ notebook
 pyodbc
 sqlite3
 azure-functions
+azure-functions-worker
 azure-storage-blob
+requests

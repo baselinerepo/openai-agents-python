@@ -64,15 +64,18 @@ MSSQL_SERVER_HOST: str = os.environ.get("MSSQL_DATA_SOURCE")
 MSSQL_DATABASE: str = os.environ.get("MSSQL_INITIAL_CATALOG")
 MSSQL_UID: str = os.environ.get("MSSQL_USER_ID")
 MSSQL_PWD: str = os.environ.get("MSSQL_USER_PWD")
-MSSQL_PYODBC_CXN_STR: str = os.environ.get("MSSQL_PYODBC_CXN_STR", "")
-MSSQL_OLEDB_CXN_STR: str = os.environ.get("MSSQL_OLEDB_CXN_STR", "")
+MSSQL_PORT: str = os.environ.get("MSSQL_PORT", "1433")
 
-print(MSSQL_PYODBC_CXN_STR)
+MSSQL_PYODBC_CNXN_STR: str = os.environ.get("MSSQL_PYODBC_CNXN_STR", "")
+MSSQL_OLEDB_CNXN_STR: str = os.environ.get("MSSQL_OLEDB_CNXN_STR", "")
+
+print(MSSQL_PYODBC_CNXN_STR)
 
 # Initialize the SQL Server client
+# encyrpt default to YES starting from ODBC Driver 18. It's good to ENCRYPT=yes on the client side
 sql_server_odbc_conn = pyodbc.connect(
     f"DRIVER={{ODBC Driver 18 for SQL Server}};"
-    f"SERVER={MSSQL_SERVER_HOST};"
+    f"SERVER={MSSQL_SERVER_HOST,MSSQL_PORT};"
     f"DATABASE={MSSQL_DATABASE};"
     f"UID={MSSQL_UID};"
     f"PWD={MSSQL_PWD}"
