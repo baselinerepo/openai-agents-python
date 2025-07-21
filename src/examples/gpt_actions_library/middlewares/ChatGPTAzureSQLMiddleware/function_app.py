@@ -12,21 +12,21 @@
 # Step 3: Run the function app locally:
 # - func start
 # - Worker process started and initialized on port localhost:7071
-# - http://localhost:7071/api/sqlconnector/query
+# - http://localhost:7071/api/sqlconnector/query/query
 #
 # Step 4: Test the endpoints using tools like Postman or curl.
 #
 # - Three Main Endpoints:
 #
-# POST /api/sql/query - Execute SELECT queries
-# GET /api/sql/schema - Get database schema information
-# POST /api/sql/procedure - Execute stored procedures
+# POST: /api/sqlconnector/query/query - Execute SELECT queries
+# GET:  /api/sqlconnector/schema/schema - Get database schema information
+# POST: /api/sqlconnector/procedure/procedure - Execute stored procedures
 #
 # - POST /api/sqlconnector/query with JSON body containing "query" and optional "parameters"
 #
 # Example Usage from GPT:
 # json// Query data
-# POST /api/sqlconnector/query
+# POST /api/sqlconnector/query/query
 # {
 #   "query": "SELECT TOP 10 * FROM SalesLT.Customer WHERE Title=@title ORDER BY CustomerID",
 #   "parameters": {
@@ -35,7 +35,7 @@
 # }
 #
 #
-#- GET /api/sqlconnector/schema with optional "table" query parameter
+#- GET /api/sqlconnector/schema/schema with optional "table" query parameter
 #
 # // Get schema
 #GET /api/sqlconnector/schema?table=Users
@@ -43,13 +43,13 @@
 #
 # - POST /api/sqlconnector/procedure with JSON body containing "procedureName" and optional "parameters"
 #
-# POST /api/sqlconnector/procedure
-# {
-#   "procedureName": "GetUsersByRole",
-#   "parameters": {
-#     "role": "admin"
-#   }
-# }
+# POST /api/sqlconnector/procedure/procedure
+#{
+#  "procedureName": "[dbo].[AP_S_Customer_details]",
+#  "parameters": {
+#    "title": "Mr."
+#  }
+#}
 #
 #--------------------------------------------------------------------
 import azure.functions as func
@@ -74,7 +74,7 @@ DANGEROUS_SQL_KEYWORDS = ['CREATE','DROP','DELETE','ALTER','INSERT','UPDATE','TR
 app = func.FunctionApp()
 
 # POST /api/sqlconnector/query
-@app.route(route="sqlconnector/{route}", auth_level=func.AuthLevel.FUNCTION, methods=["POST"])
+@app.route(route="sqlconnector/query/{route}", auth_level=func.AuthLevel.FUNCTION, methods=["POST"])
 def sqlconnector_query(req: func.HttpRequest) -> func.HttpResponse:
     try:
         logging.info('Python HTTP trigger function processed sql query request.')
@@ -89,20 +89,21 @@ def sqlconnector_query(req: func.HttpRequest) -> func.HttpResponse:
         )
 
 
-# GET /api/sqlconnector/schema?table=Users
-@app.route(route="sqlconnector/schema", auth_level=func.AuthLevel.FUNCTION, methods=["GET"])
-def sqlconnector_schema(req: func.HttpRequest) -> func.HttpResponse:
-    logging.info('Python HTTP trigger function processed sql schema request.')
-    req.route_params['route'] = 'schema'
-    return main(req)
-
-
-# POST /api/sqliteconnector/procedure
-@app.route(route="sqlconnector/procedure", auth_level=func.AuthLevel.ANONYMOUS, methods=["POST"])
+# POST: http://localhost:7071/api/sqlconnector/procedure
+@app.route(route="sqlconnector/procedure/{route}", auth_level=func.AuthLevel.ANONYMOUS, methods=["POST"])
 def sqlconnector_procedure(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed sql stored procedure request.')
-    req.route_params['route'] = 'procedure'
+    #req.route_params['route'] = 'procedure'
     return main(req)
+
+
+# GET /api/sqlconnector/schema?table=Users
+@app.route(route="sqlconnector/schema/{route}", auth_level=func.AuthLevel.FUNCTION, methods=["GET"])
+def sqlconnector_schema(req: func.HttpRequest) -> func.HttpResponse:
+    logging.info('Python HTTP trigger function processed sql schema request.')
+    #req.route_params['route'] = 'schema'
+    return main(req)
+
 
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
@@ -111,15 +112,13 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     # route the request to the appropriate function
     route = req.route_params.get('route')
 
-    print(req)
-    
     try:
         if route == 'query':
-            return execute_query(req)
+            return query_handler(req)
         elif route == 'schema':
-            return get_schema(req)
+            return schema_handler(req)
         elif route == 'procedure':
-            return execute_stored_procedure(req)
+            return stored_procedure_handler(req)
         else:
             return func.HttpResponse(
                 json.dumps({ "error": "Invalid route"}),
@@ -171,136 +170,7 @@ def get_dbConnection():
         raise e
     
 
-def execute_sql_query(query: str, parameters: Dict[str, Any] = None) -> Dict[str, Any]:
-    """Execute a SQL query and return the results."""
-    start_time = time.time()
-    results = []
-
-    with get_dbConnection() as cnxn:
-        cur = cnxn.cursor()
-
-        # prepare parameterized query
-        if parameters:
-            # Use parameterized query to prevent SQL injection
-            # convert parameters to a puodbc compatible format
-            param_values = []
-            modified_query = query
-
-            for key, value in parameters.items():
-                # replace the parameter placeholder with a question mark ? for pyodbc sqlite
-                # modified_query = modified_query.replace(f'@{key}', '?')
-                modified_query = modified_query.replace(f'@{key}', f"'{value}'")
-                param_values.append(value)
-
-            print(f"Modified Query: {modified_query}")
-
-            #cur.execute(modified_query, param_values or {}) => use for sqlite
-            cur.execute(modified_query) # => execute a single parameterized sqlserver query
-        else:
-            cur.execute(query)
-
-        # fetch results
-        columns = [column[0] for column in cur.description] if cur.description else []
-        results = [dict(zip(columns, row)) for row in cur.fetchall()]
-
-        #for row in cur.fetchall():
-        #    row_dict = {}
-        #    for i, value in enumerate(row):
-        #        row_dict[columns[i]] = value
-        #    results.append(row_dict)
-
-    execution_time = (time.time() - start_time) * 1000  # convert to milliseconds
-
-    return {
-        "data": results,
-        "row_count": len(results),
-        "execution_time": round(execution_time, 2),
-    }
-
-
-def execute_stored_proc(procedure_name: str, parameters: Dict[str, Any] = None) -> Dict[str, Any]:
-    """Execute a stored procedure and return the results."""
-    start_time = time.time()
-    results = []
-
-    try:
-        with get_dbConnection() as cnxn:
-            cursor = cnxn.cursor()
-
-            # prepare parameterized query
-            param_values = []
-            parameterized_procedure = f"EXEC {procedure_name}"
-
-            # build procedure call with parameters
-            if parameters:
-                for key, value in parameters.items():
-                    parameterized_procedure += f" @{key}=?"
-                    param_values.append(value)
-
-            cursor.execute(parameterized_procedure, param_values)
-            columns = [column[0] for column in cursor.description]
-            results = [dict(zip(columns, row)) for row in cursor.fetchall()]
-
-            execution_time = (time.time() - start_time) * 1000  # convert to milliseconds
-
-            cnxn.commit()
-            return {
-                "data": results,
-                "row_count": len(results),
-                "execution_time": round(execution_time, 2)
-            }
-
-    except Exception as e:
-        logging.error(f"Stored procedure execution error: {str(e)}")
-        return {
-            json.dumps({"error": str(e)}),
-        }
-
-
-def get_table_schema(table_name: Optional[str] = None) -> List[Dict[str, Any]]:
-    """Get database schema information"""
-    base_query = """
-        SELECT 
-            t.TABLE_NAME,
-            c.COLUMN_NAME,
-            c.DATA_TYPE,
-            c.IS_NULLABLE,
-            c.COLUMN_DEFAULT,
-            c.CHARACTER_MAXIMUM_LENGTH,
-            c.NUMERIC_PRECISION,
-            c.NUMERIC_SCALE
-        FROM INFORMATION_SCHEMA.TABLES t
-        INNER JOIN INFORMATION_SCHEMA.COLUMNS c ON t.TABLE_NAME = c.TABLE_NAME
-        WHERE t.TABLE_TYPE = 'BASE TABLE'
-    """
-    
-    if table_name:
-        query = base_query + " AND t.TABLE_NAME = ?"
-        params = [table_name]
-    else:
-        query = base_query
-        params = []
-    
-    query += " ORDER BY t.TABLE_NAME, c.ORDINAL_POSITION"
-    
-    schemas = []
-    
-    with get_dbConnection() as conn:
-        cursor = conn.cursor()
-        cursor.execute(query, params)
-        
-        columns = [column[0] for column in cursor.description]
-        
-        for row in cursor.fetchall():
-            schema_dict = {}
-            for i, value in enumerate(row):
-                schema_dict[columns[i]] = value
-            schemas.append(schema_dict)
-    
-    return schemas
-
-
-def execute_query(req: func.HttpRequest) -> func.HttpResponse:
+def query_handler(req: func.HttpRequest) -> func.HttpResponse:
     """Execute a SELECT query"""
     try:
         # Validate API key
@@ -364,47 +234,62 @@ def execute_query(req: func.HttpRequest) -> func.HttpResponse:
         )
 
 
-def get_schema(req: func.HttpRequest) -> func.HttpResponse:
-    """Get database schema information"""
-    try:
-        if not validate_api_key(req):
-            return func.HttpResponse(
-                json.dumps({"error": "Invalid API key"}),
-                status_code=401,
-                mimetype="application/json"
-            )
-        
-        table_name = req.params.get('table')
-        
-        schema = get_table_schema(table_name)
-        
-        return func.HttpResponse(
-            json.dumps({
-                "success": True,
-                "schema": schema
-            }, default=str),
-            status_code=200,
-            mimetype="application/json"
-        )
-        
-    except Exception as e:
-        logging.error(f"Error getting schema: {str(e)}")
-        return func.HttpResponse(
-            json.dumps({"error": str(e)}),
-            status_code=500,
-            mimetype="application/json"
-        )
+def execute_sql_query(query: str, parameters: Dict[str, Any] = None) -> Dict[str, Any]:
+    """Execute a SQL query and return the results."""
+    start_time = time.time()
+    results = []
+
+    with get_dbConnection() as cnxn:
+        cur = cnxn.cursor()
+
+        # prepare parameterized query
+        if parameters:
+            # Use parameterized query to prevent SQL injection
+            # convert parameters to a pyodbc compatible format
+            param_values = []
+            modified_query = query
+
+            for key, value in parameters.items():
+                # replace the parameter placeholder with a question mark ? for pyodbc sql
+                modified_query = modified_query.replace(f'@{key}', '?')
+                #modified_query = modified_query.replace(f'@{key}', f"'{value}'")
+                param_values.append(value)
+
+            cur.execute(modified_query, param_values or {})
+            #cur.execute(modified_query) # => execute a single parameterized sqlserver query
+        else:
+            cur.execute(query)
+
+        # fetch results
+        columns = [column[0] for column in cur.description] if cur.description else []
+        results = [dict(zip(columns, row)) for row in cur.fetchall()]
+
+        cur.close()
+
+        #for row in cur.fetchall():
+        #    row_dict = {}
+        #    for i, value in enumerate(row):
+        #        row_dict[columns[i]] = value
+        #    results.append(row_dict)
+
+    execution_time = (time.time() - start_time) * 1000  # convert to milliseconds
+
+    return {
+        "data": results,
+        "row_count": len(results),
+        "execution_time": round(execution_time, 2),
+    }
 
 
-def execute_stored_procedure(req: func.HttpRequest) -> func.HttpResponse:
-    """Execute a stored procedure"""
+def stored_procedure_handler(req: func.HttpRequest) -> func.HttpResponse:
+    """Execute a stored procedure handler"""
     try:
-        if not validate_api_key(req):
-            return func.HttpResponse(
-                json.dumps({"error": "Invalid API key"}),
-                status_code=401,
-                mimetype="application/json"
-            )
+        #if not validate_api_key(req):
+        #    return func.HttpResponse(
+        #        json.dumps({"error": "Invalid API key"}),
+        #        status_code=401,
+        #        mimetype="application/json"
+        #    )
         
         try:
             req_body = req.get_json()
@@ -447,3 +332,123 @@ def execute_stored_procedure(req: func.HttpRequest) -> func.HttpResponse:
             status_code=500,
             mimetype="application/json"
         )
+
+
+def execute_stored_proc(procedure_name: str, parameters: Dict[str, Any] = None) -> Dict[str, Any]:
+    """Execute a stored procedure and return the results."""
+    start_time = time.time()
+    results = []
+
+    try:
+        with get_dbConnection() as cnxn:
+            cur = cnxn.cursor()
+
+            # prepare parameterized query
+            param_values = []
+            parameterized_procedure = f"EXEC {procedure_name}"
+
+            print(procedure_name, parameters)
+
+            # build procedure call with parameters
+            if parameters:
+                for key, value in parameters.items():
+                    parameterized_procedure += f" @{key}=?"
+                    param_values.append(value)
+
+            print(parameterized_procedure)
+            cur.execute(parameterized_procedure, param_values)
+            columns = [column[0] for column in cur.description]
+            results = [dict(zip(columns, row)) for row in cur.fetchall()]
+
+            cnxn.commit()
+            cur.close()
+
+            execution_time = (time.time() - start_time) * 1000  # convert to milliseconds
+
+            return {
+                "data": results,
+                "row_count": len(results),
+                "execution_time": round(execution_time, 2)
+            }
+
+    except Exception as e:
+        logging.error(f"Stored procedure execution error: {str(e)}")
+        return {
+            json.dumps({"error": str(e)}),
+        }
+
+def schema_handler(req: func.HttpRequest) -> func.HttpResponse:
+    """Get database schema information"""
+    try:
+        #if not validate_api_key(req):
+        #    return func.HttpResponse(
+        #        json.dumps({"error": "Invalid API key"}),
+        #        status_code=401,
+        #        mimetype="application/json"
+        #    )
+        
+        table_name = req.params.get('table')
+        
+        schema = get_table_schema(table_name)
+        
+        return func.HttpResponse(
+            json.dumps({
+                "success": True,
+                "schema": schema
+            }, default=str),
+            status_code=200,
+            mimetype="application/json"
+        )
+        
+    except Exception as e:
+        logging.error(f"Error getting schema: {str(e)}")
+        return func.HttpResponse(
+            json.dumps({"error": str(e)}),
+            status_code=500,
+            mimetype="application/json"
+        )
+
+
+def get_table_schema(table_name: Optional[str] = None) -> List[Dict[str, Any]]:
+    """Get database schema information"""
+    base_query = """
+        SELECT 
+            t.TABLE_NAME,
+            c.COLUMN_NAME,
+            c.DATA_TYPE,
+            c.IS_NULLABLE,
+            c.COLUMN_DEFAULT,
+            c.CHARACTER_MAXIMUM_LENGTH,
+            c.NUMERIC_PRECISION,
+            c.NUMERIC_SCALE
+        FROM INFORMATION_SCHEMA.TABLES t
+        INNER JOIN INFORMATION_SCHEMA.COLUMNS c ON t.TABLE_NAME = c.TABLE_NAME
+        WHERE t.TABLE_TYPE = 'BASE TABLE'
+    """
+    
+    if table_name:
+        query = base_query + " AND t.TABLE_NAME = ?"
+        params = [table_name]
+    else:
+        query = base_query
+        params = []
+    
+    query += " ORDER BY t.TABLE_NAME, c.ORDINAL_POSITION"
+    
+    schemas = []
+    
+    with get_dbConnection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(query, params)
+        
+        columns = [column[0] for column in cursor.description]
+        
+        for row in cursor.fetchall():
+            schema_dict = {}
+            for i, value in enumerate(row):
+                schema_dict[columns[i]] = value
+            schemas.append(schema_dict)
+
+        cursor.close()
+    
+    return schemas
