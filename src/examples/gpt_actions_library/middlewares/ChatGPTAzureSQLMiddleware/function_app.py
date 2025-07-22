@@ -64,7 +64,16 @@ from typing import Any, List, Dict, Optional, Any
 load_dotenv(find_dotenv(), override=True)
 
 # Configuration
-AZURE_SQL_CNXN_STRING = os.getenv("AZURE_SQL_CNXN_STRING", "")
+MSSQL_OLEDB_PROVIDER = os.getenv("MSSQL_OLEDB_PROVIDER", "")
+MSSQL_DATA_SOURCE = os.getenv("MSSQL_DATA_SOURCE", "")
+MSSQL_INITIAL_CATALOG = os.getenv("MSSQL_INITIAL_CATALOG", "")
+MSSQL_USER_ID = os.getenv("MSSQL_USER_ID", "")
+MSSQL_USER_PWD = os.getenv("MSSQL_USER_PWD", "")
+MSSQL_PORT = os.getenv("MSSQL_PORT", "")
+ODBC_DRIVER = os.getenv("ODBC_DRIVER", "")
+
+AZURE_SQL_CNXN_STRING = f"Driver={ODBC_DRIVER};Server={MSSQL_DATA_SOURCE},{MSSQL_PORT};Database={MSSQL_INITIAL_CATALOG};UID={MSSQL_USER_ID};PWD={MSSQL_USER_PWD};Encrypt=yes;TrustServerCertificate=no;Connection Timeout=20;"
+#AZURE_SQL_CNXN_STRING = os.getenv("AZURE_SQL_CNXN_STRING", "")
 AZURE_API_KEY = os.getenv("AZURE_API_KEY", "")
 
 # dengarous SQL keywords to prevent SQL injection
