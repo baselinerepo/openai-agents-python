@@ -83,6 +83,7 @@ DANGEROUS_SQL_KEYWORDS = ['CREATE','DROP','DELETE','ALTER','INSERT','UPDATE','TR
 app = func.FunctionApp()
 
 # POST /api/sqlconnector/query
+@app.function_name("sqlconnector_query")
 @app.route(route="sqlconnector/query/{route}", auth_level=func.AuthLevel.FUNCTION, methods=["POST"])
 def sqlconnector_query(req: func.HttpRequest) -> func.HttpResponse:
     try:
@@ -99,6 +100,7 @@ def sqlconnector_query(req: func.HttpRequest) -> func.HttpResponse:
 
 
 # POST: http://localhost:7071/api/sqlconnector/procedure
+@app.function_name("sqlconnector_procedure")
 @app.route(route="sqlconnector/procedure/{route}", auth_level=func.AuthLevel.ANONYMOUS, methods=["POST"])
 def sqlconnector_procedure(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed sql stored procedure request.')
@@ -107,6 +109,7 @@ def sqlconnector_procedure(req: func.HttpRequest) -> func.HttpResponse:
 
 
 # GET /api/sqlconnector/schema?table=Users
+@app.function_name("sqlconnector_schema")
 @app.route(route="sqlconnector/schema/{route}", auth_level=func.AuthLevel.FUNCTION, methods=["GET"])
 def sqlconnector_schema(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed sql schema request.')
